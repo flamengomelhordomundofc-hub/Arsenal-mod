@@ -28,7 +28,7 @@ GBIN="$GDIR/gradle-8.1.1/bin/gradle"
 if [ ! -x "$GBIN" ]; then
     echo "[2/5] Baixando Gradle 8.1.1..."
     mkdir -p "$GDIR"
-    wget -q --show-progress -O "$GDIR/g.zip" "https://services.gradle.org/distributions/gradle-8.1.1-bin.zip"
+    wget -q -O "$GDIR/g.zip" "https://services.gradle.org/distributions/gradle-8.1.1-bin.zip"
     unzip -q -o "$GDIR/g.zip" -d "$GDIR" && rm -f "$GDIR/g.zip"
 else
     echo "[2/5] Gradle 8.1.1 ja instalado!"
@@ -39,7 +39,6 @@ W="$PWD/arsenalmod_v2"
 rm -rf "$W" && mkdir -p "$W" && cd "$W"
 mkdir -p src/main/java/com/arsenalmod/{item,registry,entity,network,client}
 mkdir -p src/main/resources/META-INF src/main/resources/assets/arsenalmod/{lang,models/item,textures/item,textures/entity}
-mkdir -p .github/workflows
 
 echo "[3/5] Gerando codigo completo do mod v2.0..."
 
@@ -49,21 +48,10 @@ org.gradle.daemon=false
 org.gradle.parallel=false
 EOF
 
-cat << 'ARSENAL_V2_EOF' > "settings.gradle"
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { name = 'MinecraftForge'; url = 'https://maven.minecraftforge.net/' }
-    }
-}
-plugins { id 'org.gradle.toolchains.foojay-resolver-convention' version '0.7.0' }
-rootProject.name = 'arsenalmod'
-ARSENAL_V2_EOF
-
 cat << 'ARSENAL_V2_EOF' > "build.gradle"
 plugins {
     id 'java'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.minecraftforge.gradle' version '6.0.24'
 }
 group = 'com.arsenalmod'
 version = '2.0.0'
@@ -87,154 +75,17 @@ tasks.named('jar', Jar).configure {
 }
 ARSENAL_V2_EOF
 
-cat << 'ARSENAL_V2_EOF' > ".github/workflows/build.yml"
-name: Compilar Arsenal 3D v2.0 (Forge 1.20.1)
-
-on:
-  push:
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Baixar codigo do repositorio
-        uses: actions/checkout@v4
-
-      - name: Configurar Java 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Configurar Gradle 8.1.1
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.1.1'
-
-      - name: Compilar Mod (.jar)
-        run: gradle build --no-daemon
-
-      - name: Disponibilizar .jar v2.0 para download
-        uses: actions/upload-artifact@v4
-        with:
-          name: arsenalmod-v2.0-1.20.1-forge
-          path: build/libs/arsenalmod-*.jar
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/pack.mcmeta"
-{"pack":{"description":"Arsenal 3D v2 Resources","pack_format":15}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/META-INF/mods.toml"
-modLoader="javafml"
-loaderVersion="[47,)"
-license="MIT"
-[[mods]]
-modId="arsenalmod"
-version="2.0.0"
-displayName="Arsenal 3D Realista"
-description='''Armas 3D detalhadas, maos animadas, marcas de bala nos blocos, estojos voando e balistica realista.'''
-[[dependencies.arsenalmod]]
-modId="forge"
-mandatory=true
-versionRange="[47,)"
-ordering="NONE"
-side="BOTH"
-[[dependencies.arsenalmod]]
-modId="minecraft"
-mandatory=true
-versionRange="[1.20.1,1.21)"
-ordering="NONE"
-side="BOTH"
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/lang/pt_br.json"
-{
-  "itemGroup.arsenalmod.arsenal_tab": "Arsenal 3D - Armas",
-  "item.arsenalmod.glock19": "Glock 19 (9mm)",
-  "item.arsenalmod.ak47": "AK-47 (7.62mm)",
-  "item.arsenalmod.m4a1": "M4A1 Tatica (5.56mm)",
-  "item.arsenalmod.spas12": "SPAS-12 (Cal. 12)",
-  "item.arsenalmod.awp_sniper": "AWP Sniper (.338)",
-  "item.arsenalmod.minigun": "M134 Minigun",
-  "item.arsenalmod.rpg7": "RPG-7 (HEAT)",
-  "item.arsenalmod.pistol_ammo": "Municao 9mm",
-  "item.arsenalmod.rifle_ammo": "Municao de Fuzil",
-  "item.arsenalmod.shotgun_shell": "Cartucho Calibre 12",
-  "item.arsenalmod.sniper_ammo": "Municao .338 Lapua",
-  "item.arsenalmod.rocket_ammo": "Foguete PG-7V",
-  "key.categories.arsenalmod": "Arsenal 3D",
-  "key.arsenalmod.reload": "Recarregar Arma"
+cat << 'ARSENAL_V2_EOF' > "settings.gradle"
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            name = 'MinecraftForge'
+            url = 'https://maven.minecraftforge.net/'
+        }
+    }
 }
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/lang/en_us.json"
-{
-  "itemGroup.arsenalmod.arsenal_tab": "Arsenal 3D - Armas",
-  "item.arsenalmod.glock19": "Glock 19 (9mm)",
-  "item.arsenalmod.ak47": "AK-47 (7.62mm)",
-  "item.arsenalmod.m4a1": "M4A1 Tatica (5.56mm)",
-  "item.arsenalmod.spas12": "SPAS-12 (Cal. 12)",
-  "item.arsenalmod.awp_sniper": "AWP Sniper (.338)",
-  "item.arsenalmod.minigun": "M134 Minigun",
-  "item.arsenalmod.rpg7": "RPG-7 (HEAT)",
-  "item.arsenalmod.pistol_ammo": "Municao 9mm",
-  "item.arsenalmod.rifle_ammo": "Municao de Fuzil",
-  "item.arsenalmod.shotgun_shell": "Cartucho Calibre 12",
-  "item.arsenalmod.sniper_ammo": "Municao .338 Lapua",
-  "item.arsenalmod.rocket_ammo": "Foguete PG-7V",
-  "key.categories.arsenalmod": "Arsenal 3D",
-  "key.arsenalmod.reload": "Recarregar Arma"
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/glock19.json"
-{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/ak47.json"
-{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/m4a1.json"
-{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/spas12.json"
-{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/awp_sniper.json"
-{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/minigun.json"
-{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/rpg7.json"
-{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/pistol_ammo.json"
-{"parent":"minecraft:item/generated","textures":{"layer0":"arsenalmod:item/pistol_ammo"}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/rifle_ammo.json"
-{"parent":"minecraft:item/generated","textures":{"layer0":"arsenalmod:item/rifle_ammo"}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/shotgun_shell.json"
-{"parent":"minecraft:item/generated","textures":{"layer0":"arsenalmod:item/shotgun_shell"}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/sniper_ammo.json"
-{"parent":"minecraft:item/generated","textures":{"layer0":"arsenalmod:item/sniper_ammo"}}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/rocket_ammo.json"
-{"parent":"minecraft:item/generated","textures":{"layer0":"arsenalmod:item/rocket_ammo"}}
+rootProject.name = 'arsenalmod'
 ARSENAL_V2_EOF
 
 cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/ArsenalMod.java"
@@ -260,734 +111,346 @@ public class ArsenalMod {
 }
 ARSENAL_V2_EOF
 
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/item/GunType.java"
-package com.arsenalmod.item;
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/BulletRenderer.java"
+package com.arsenalmod.client;
 
-public enum GunType {
-    GLOCK19("glock19", "Glock 19", 12.0F, 0.22F, 5, 17, 32, false, 1, 1.1F, 6.0F,
-            0.095F, 5.2F, 1.1F, 0.86F, false, false, false, AmmoKind.PISTOL, 17, 2.55F, -5.2F, 1.65F),
-    AK47("ak47", "AK-47", 17.0F, 0.48F, 3, 30, 44, true, 1, 1.7F, 6.8F,
-            0.135F, 4.6F, 1.25F, 0.76F, false, false, false, AmmoKind.RIFLE, 15, 2.90F, -16.0F, 0.95F),
-    M4A1("m4a1", "M4A1 Tatica", 14.0F, 0.38F, 2, 30, 40, true, 1, 0.9F, 7.2F,
-            0.085F, 2.8F, 0.72F, 0.70F, false, false, false, AmmoKind.RIFLE, 15, 3.55F, -17.0F, 1.05F),
-    SPAS12("spas12", "SPAS-12", 6.5F, 0.20F, 15, 8, 48, false, 10, 6.2F, 5.4F,
-            0.28F, 12.5F, 3.6F, 0.84F, false, false, true, AmmoKind.SHOTGUN, 1, 2.65F, -14.8F, 1.35F),
-    AWP_SNIPER("awp_sniper", "AWP Sniper", 55.0F, 0.82F, 26, 5, 56, false, 1, 0.06F, 10.5F,
-            0.30F, 15.0F, 4.2F, 0.22F, false, true, false, AmmoKind.SNIPER, 1, 3.70F, -21.5F, 1.35F),
-    MINIGUN("minigun", "M134 Minigun", 11.0F, 0.45F, 1, 200, 68, true, 1, 2.9F, 6.8F,
-            0.065F, 1.7F, 0.48F, 0.85F, false, false, false, AmmoKind.RIFLE, 40, 2.60F, -16.5F, 0.45F),
-    RPG7("rpg7", "RPG-7", 80.0F, 0.95F, 28, 1, 60, false, 1, 0.28F, 2.8F,
-            0.40F, 17.5F, 5.0F, 0.76F, true, false, false, AmmoKind.ROCKET, 1, 3.35F, -17.5F, 1.2F);
-
-    public enum AmmoKind { PISTOL, RIFLE, SHOTGUN, SNIPER, ROCKET }
-
-    public final String id, displayName;
-    public final float damage, armorPen, spread, bulletSpeed, recoilKick, recoilPitch, cameraKick, adsFov;
-    public final float sightVoxelsY, muzzleVoxelsZ, muzzleVoxelsY;
-    public final int fireCooldown, maxAmmo, reloadTicks, pellets, roundsPerAmmoItem;
-    public final boolean fullAuto, isRocket, isSniper, isShotgun;
-    public final AmmoKind ammoKind;
-
-    GunType(String id, String displayName, float damage, float armorPen, int fireCooldown, int maxAmmo,
-            int reloadTicks, boolean fullAuto, int pellets, float spread, float bulletSpeed,
-            float recoilKick, float recoilPitch, float cameraKick, float adsFov,
-            boolean isRocket, boolean isSniper, boolean isShotgun, AmmoKind ammoKind,
-            int roundsPerAmmoItem, float sightVoxelsY, float muzzleVoxelsZ, float muzzleVoxelsY) {
-        this.id = id; this.displayName = displayName; this.damage = damage; this.armorPen = armorPen;
-        this.fireCooldown = fireCooldown; this.maxAmmo = maxAmmo; this.reloadTicks = reloadTicks;
-        this.fullAuto = fullAuto; this.pellets = pellets; this.spread = spread; this.bulletSpeed = bulletSpeed;
-        this.recoilKick = recoilKick; this.recoilPitch = recoilPitch; this.cameraKick = cameraKick;
-        this.adsFov = adsFov; this.isRocket = isRocket; this.isSniper = isSniper; this.isShotgun = isShotgun;
-        this.ammoKind = ammoKind; this.roundsPerAmmoItem = roundsPerAmmoItem;
-        this.sightVoxelsY = sightVoxelsY; this.muzzleVoxelsZ = muzzleVoxelsZ; this.muzzleVoxelsY = muzzleVoxelsY;
-    }
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/item/GunItem.java"
-package com.arsenalmod.item;
-
-import com.arsenalmod.client.GunAnimationEngine;
-import com.arsenalmod.client.GunItemRenderer;
-import com.arsenalmod.registry.ModItems;
+import com.arsenalmod.entity.BulletEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.function.Consumer;
-
-public class GunItem extends Item {
-    public static final String TAG_AMMO = "Ammo", TAG_REL = "Rel", TAG_RS = "RS", TAG_RE = "RE", TAG_LAST = "Last";
-    private final GunType type;
-
-    public GunItem(GunType type) { super(new Item.Properties().stacksTo(1)); this.type = type; }
-    public GunType getType() { return type; }
-
-    public int getAmmo(ItemStack s) {
-        CompoundTag t = s.getTag();
-        return (t == null || !t.contains(TAG_AMMO)) ? type.maxAmmo : t.getInt(TAG_AMMO);
-    }
-    public void setAmmo(ItemStack s, int a) { s.getOrCreateTag().putInt(TAG_AMMO, Mth.clamp(a, 0, type.maxAmmo)); }
-    public long getLastShot(ItemStack s) { return s.getTag() == null ? -1000L : s.getTag().getLong(TAG_LAST); }
-    public void setLastShot(ItemStack s, long tick) { s.getOrCreateTag().putLong(TAG_LAST, tick); }
-
-    public boolean isReloading(ItemStack s, long now) {
-        CompoundTag t = s.getTag();
-        return t != null && t.getBoolean(TAG_REL) && now <= t.getLong(TAG_RE) + 2L;
-    }
-    public float getReloadProgress(ItemStack s, long now, float pt) {
-        CompoundTag t = s.getTag();
-        if (t == null || !t.getBoolean(TAG_REL)) return 0F;
-        long st = t.getLong(TAG_RS), en = t.getLong(TAG_RE);
-        return en <= st ? 0F : Mth.clamp(((now + pt) - st) / (float)(en - st), 0F, 1F);
-    }
-
-    public boolean hasReserve(Player p) {
-        if (p.isCreative()) return true;
-        Item a = ModItems.getAmmoItem(type.ammoKind);
-        for (ItemStack st : p.getInventory().items) if (st.is(a) && !st.isEmpty()) return true;
-        return false;
-    }
-
-    public void startReload(ItemStack s, Player p) {
-        long now = p.level().getGameTime();
-        if (isReloading(s, now) || getAmmo(s) >= type.maxAmmo) return;
-        if (!hasReserve(p)) {
-            p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 0.6F, 1.5F);
-            return;
-        }
-        CompoundTag t = s.getOrCreateTag();
-        t.putBoolean(TAG_REL, true); t.putLong(TAG_RS, now); t.putLong(TAG_RE, now + type.reloadTicks);
-        p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.PLAYERS, 0.5F, 1.85F);
-    }
-
-    @Override
-    public void inventoryTick(ItemStack s, Level lvl, Entity e, int slot, boolean sel) {
-        if (lvl.isClientSide || !(e instanceof Player p)) return;
-        CompoundTag t = s.getTag();
-        if (t == null) { setAmmo(s, type.maxAmmo); return; }
-        if (t.getBoolean(TAG_REL)) {
-            if (!sel) { t.putBoolean(TAG_REL, false); return; }
-            if (lvl.getGameTime() >= t.getLong(TAG_RE)) {
-                t.putBoolean(TAG_REL, false);
-                if (p.isCreative()) setAmmo(s, type.maxAmmo);
-                else {
-                    int cur = getAmmo(s), need = type.maxAmmo - cur, got = 0;
-                    Item a = ModItems.getAmmoItem(type.ammoKind);
-                    for (ItemStack inv : p.getInventory().items) {
-                        if (got >= need) break;
-                        if (inv.is(a)) while (!inv.isEmpty() && got < need) { inv.shrink(1); got += type.roundsPerAmmoItem; }
-                    }
-                    setAmmo(s, Math.min(type.maxAmmo, cur + got));
-                }
-                lvl.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PISTON_CONTRACT, SoundSource.PLAYERS, 0.55F, 1.9F);
-            }
-        }
-    }
-
-    @Override public boolean canAttackBlock(BlockState st, Level l, BlockPos pos, Player p) { return false; }
-    @Override public boolean shouldCauseReequipAnimation(ItemStack o, ItemStack n, boolean sc) { return sc || o.getItem() != n.getItem(); }
-    @Override public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) { return InteractionResultHolder.pass(p.getItemInHand(h)); }
-
-    @Override
-    public void appendHoverText(ItemStack s, @Nullable Level l, List<Component> tip, TooltipFlag f) {
-        String dmg = type.pellets > 1 ? String.format("%.1f x%d", type.damage, type.pellets) : String.format("%.1f", type.damage);
-        tip.add(Component.literal("Municao: " + getAmmo(s) + "/" + type.maxAmmo + " | Dano: " + dmg).withStyle(ChatFormatting.GOLD));
-        tip.add(Component.literal("Perf. Armadura: " + Math.round(type.armorPen * 100) + "% | Headshot 2.2x").withStyle(ChatFormatting.RED));
-        tip.add(Component.literal("[Esq] Atirar  [Dir] Mirar  [R] Recarregar").withStyle(ChatFormatting.AQUA));
-    }
-
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> c) {
-        c.accept(new IClientItemExtensions() {
-            private GunItemRenderer r;
-            @Override public BlockEntityWithoutLevelRenderer getCustomRenderer() { return r == null ? (r = new GunItemRenderer()) : r; }
-            @Override public boolean applyForgeHandTransform(PoseStack ps, LocalPlayer p, HumanoidArm arm, ItemStack s, float pt, float eq, float sw) {
-                return GunAnimationEngine.applyFirstPersonTransform(ps, p, arm, s, pt, eq);
-            }
-            @Override public HumanoidModel.ArmPose getArmPose(LivingEntity e, InteractionHand h, ItemStack s) { return HumanoidModel.ArmPose.BOW_AND_ARROW; }
-        });
-    }
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/registry/ModItems.java"
-package com.arsenalmod.registry;
-
-import com.arsenalmod.ArsenalMod;
-import com.arsenalmod.item.*;
-import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.*;
-
-public class ModItems {
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, ArsenalMod.MODID);
-    public static final RegistryObject<Item> GLOCK19 = ITEMS.register("glock19", () -> new GunItem(GunType.GLOCK19));
-    public static final RegistryObject<Item> AK47 = ITEMS.register("ak47", () -> new GunItem(GunType.AK47));
-    public static final RegistryObject<Item> M4A1 = ITEMS.register("m4a1", () -> new GunItem(GunType.M4A1));
-    public static final RegistryObject<Item> SPAS12 = ITEMS.register("spas12", () -> new GunItem(GunType.SPAS12));
-    public static final RegistryObject<Item> AWP_SNIPER = ITEMS.register("awp_sniper", () -> new GunItem(GunType.AWP_SNIPER));
-    public static final RegistryObject<Item> MINIGUN = ITEMS.register("minigun", () -> new GunItem(GunType.MINIGUN));
-    public static final RegistryObject<Item> RPG7 = ITEMS.register("rpg7", () -> new GunItem(GunType.RPG7));
-    public static final RegistryObject<Item> PISTOL_AMMO = ITEMS.register("pistol_ammo", () -> new Item(new Item.Properties()));
-    public static final RegistryObject<Item> RIFLE_AMMO = ITEMS.register("rifle_ammo", () -> new Item(new Item.Properties()));
-    public static final RegistryObject<Item> SHOTGUN_SHELL = ITEMS.register("shotgun_shell", () -> new Item(new Item.Properties()));
-    public static final RegistryObject<Item> SNIPER_AMMO = ITEMS.register("sniper_ammo", () -> new Item(new Item.Properties()));
-    public static final RegistryObject<Item> ROCKET_AMMO = ITEMS.register("rocket_ammo", () -> new Item(new Item.Properties().stacksTo(16)));
-
-    public static Item getAmmoItem(GunType.AmmoKind k) {
-        return switch (k) {
-            case PISTOL -> PISTOL_AMMO.get();
-            case RIFLE -> RIFLE_AMMO.get();
-            case SHOTGUN -> SHOTGUN_SHELL.get();
-            case SNIPER -> SNIPER_AMMO.get();
-            case ROCKET -> ROCKET_AMMO.get();
-        };
-    }
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/registry/ModEntities.java"
-package com.arsenalmod.registry;
-
-import com.arsenalmod.ArsenalMod;
-import com.arsenalmod.entity.*;
-import net.minecraft.world.entity.*;
-import net.minecraftforge.registries.*;
-
-public class ModEntities {
-    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, ArsenalMod.MODID);
-    public static final RegistryObject<EntityType<BulletEntity>> BULLET = ENTITIES.register("bullet",
-            () -> EntityType.Builder.<BulletEntity>of(BulletEntity::new, MobCategory.MISC).sized(0.14F, 0.14F).clientTrackingRange(8).updateInterval(1).build("bullet"));
-    public static final RegistryObject<EntityType<RocketEntity>> ROCKET = ENTITIES.register("rocket",
-            () -> EntityType.Builder.<RocketEntity>of(RocketEntity::new, MobCategory.MISC).sized(0.42F, 0.42F).clientTrackingRange(10).updateInterval(1).build("rocket"));
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/registry/ModCreativeTabs.java"
-package com.arsenalmod.registry;
-
-import com.arsenalmod.ArsenalMod;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.*;
-import net.minecraftforge.registries.*;
-
-public class ModCreativeTabs {
-    public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, ArsenalMod.MODID);
-    public static final RegistryObject<CreativeModeTab> ARSENAL_TAB = TABS.register("arsenal_tab",
-            () -> CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup.arsenalmod.arsenal_tab"))
-                    .icon(() -> new ItemStack(ModItems.AK47.get()))
-                    .displayItems((p, out) -> {
-                        out.accept(ModItems.GLOCK19.get()); out.accept(ModItems.AK47.get());
-                        out.accept(ModItems.M4A1.get()); out.accept(ModItems.SPAS12.get());
-                        out.accept(ModItems.AWP_SNIPER.get()); out.accept(ModItems.MINIGUN.get());
-                        out.accept(ModItems.RPG7.get()); out.accept(ModItems.PISTOL_AMMO.get());
-                        out.accept(ModItems.RIFLE_AMMO.get()); out.accept(ModItems.SHOTGUN_SHELL.get());
-                        out.accept(ModItems.SNIPER_AMMO.get()); out.accept(ModItems.ROCKET_AMMO.get());
-                    }).build());
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/entity/BulletEntity.java"
-package com.arsenalmod.entity;
-
-import com.arsenalmod.network.*;
-import com.arsenalmod.registry.ModEntities;
-import net.minecraft.core.particles.*;
-import net.minecraft.server.level.*;
-import net.minecraft.sounds.*;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.projectile.ThrowableProjectile;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.*;
-import net.minecraftforge.network.PacketDistributor;
-
-public class BulletEntity extends ThrowableProjectile {
-    private float damage = 14.0F;
-    private float armorPen = 0.35F;
-
-    public BulletEntity(EntityType<? extends BulletEntity> type, Level level) { super(type, level); }
-    public BulletEntity(Level level, LivingEntity shooter, float damage, float armorPen) {
-        super(ModEntities.BULLET.get(), shooter, level);
-        this.damage = damage;
-        this.armorPen = armorPen;
-    }
-
-    @Override protected void defineSynchedData() {}
-    @Override protected float getGravity() { return 0.005F; }
-
-    @Override
-    public void tick() {
-        super.tick();
-        if (this.level().isClientSide) {
-            this.level().addParticle(ParticleTypes.SMOKE, getX(), getY(), getZ(), 0, 0, 0);
-        }
-        if (this.tickCount > 70) this.discard();
-    }
-
-    @Override
-    protected void onHitEntity(EntityHitResult res) {
-        super.onHitEntity(res);
-        Entity target = res.getEntity(), owner = this.getOwner();
-        if (target == owner || this.level().isClientSide) return;
-
-        double relY = (res.getLocation().y - target.getY()) / Math.max(0.2, target.getBbHeight());
-        boolean headshot = relY >= 0.72;
-        float zoneMul = headshot ? 2.2F : (relY < 0.32 ? 0.78F : 1.0F);
-        float finalDmg = this.damage * zoneMul;
-
-        // Realistic armor penetration scaling
-        if (target instanceof LivingEntity living) {
-            float armor = living.getArmorValue();
-            if (armor > 0) finalDmg *= (1.0F + this.armorPen * (armor / 16.0F));
-        }
-
-        target.invulnerableTime = 0;
-        boolean hurt = target.hurt(this.damageSources().thrown(this, owner), finalDmg);
-        boolean killed = target instanceof LivingEntity lv && lv.isDeadOrDying();
-
-        if (hurt && owner instanceof ServerPlayer sp) {
-            ModNetwork.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), new S2CHitmarkerPacket(headshot, killed));
-            sp.playNotifySound(headshot ? SoundEvents.EXPERIENCE_ORB_PICKUP : SoundEvents.ARROW_HIT_PLAYER,
-                    SoundSource.PLAYERS, 0.7F, headshot ? 1.9F : 1.4F);
-        }
-        if (this.level() instanceof ServerLevel sl) {
-            Vec3 h = res.getLocation();
-            sl.sendParticles(headshot ? ParticleTypes.CRIT : ParticleTypes.DAMAGE_INDICATOR, h.x, h.y, h.z, headshot ? 12 : 5, 0.12, 0.12, 0.12, 0.22);
-            sl.sendParticles(ParticleTypes.SMOKE, h.x, h.y, h.z, 3, 0.05, 0.05, 0.05, 0.05);
-        }
-        this.discard();
-    }
-
-    @Override
-    protected void onHitBlock(BlockHitResult res) {
-        super.onHitBlock(res);
-        if (!this.level().isClientSide && this.level() instanceof ServerLevel sl) {
-            Vec3 h = res.getLocation();
-            BlockState st = sl.getBlockState(res.getBlockPos());
-            sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, st), h.x, h.y, h.z, 10, 0.08, 0.08, 0.08, 0.18);
-            sl.sendParticles(ParticleTypes.CRIT, h.x, h.y, h.z, 6, 0.05, 0.05, 0.05, 0.2);
-            sl.sendParticles(ParticleTypes.SMOKE, h.x, h.y, h.z, 4, 0.04, 0.04, 0.04, 0.03);
-            sl.playSound(null, h.x, h.y, h.z, st.getSoundType().getHitSound(), SoundSource.BLOCKS, 0.65F, 1.55F);
-            ModNetwork.INSTANCE.send(
-                    PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(h.x, h.y, h.z, 96.0, sl.dimension())),
-                    new S2CImpactPacket(h.x, h.y, h.z, res.getDirection().get3DDataValue())
-            );
-            this.discard();
-        }
-    }
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/entity/RocketEntity.java"
-package com.arsenalmod.entity;
-
-import com.arsenalmod.registry.ModEntities;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.projectile.ThrowableProjectile;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.*;
-
-public class RocketEntity extends ThrowableProjectile {
-    private float dmg = 80.0F;
-    public RocketEntity(EntityType<? extends RocketEntity> t, Level l) { super(t, l); }
-    public RocketEntity(Level l, LivingEntity s, float dmg) { super(ModEntities.ROCKET.get(), s, l); this.dmg = dmg; }
-
-    @Override protected void defineSynchedData() {}
-    @Override protected float getGravity() { return 0.008F; }
-
-    @Override
-    public void tick() {
-        super.tick();
-        if (this.level().isClientSide) {
-            Vec3 m = getDeltaMovement();
-            for (int i = 0; i < 4; i++) {
-                double f = i * 0.25;
-                this.level().addParticle(ParticleTypes.FLAME, getX()-m.x*f, getY()-m.y*f, getZ()-m.z*f,
-                        (random.nextDouble()-0.5)*0.07, (random.nextDouble()-0.5)*0.07, (random.nextDouble()-0.5)*0.07);
-            }
-            this.level().addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, getX()-m.x*0.5, getY()-m.y*0.5, getZ()-m.z*0.5, 0, 0.03, 0);
-        }
-        if (this.tickCount > 120) boom();
-    }
-
-    private void boom() {
-        if (!this.level().isClientSide) {
-            if (this.level() instanceof ServerLevel sl) {
-                sl.sendParticles(ParticleTypes.EXPLOSION_EMITTER, getX(), getY(), getZ(), 3, 0.5, 0.5, 0.5, 0);
-                sl.sendParticles(ParticleTypes.FLAME, getX(), getY(), getZ(), 50, 1.2, 1.2, 1.2, 0.3);
-                sl.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY(), getZ(), 30, 1.0, 1.0, 1.0, 0.15);
-            }
-            this.level().explode(this, getX(), getY(), getZ(), 5.5F, Level.ExplosionInteraction.TNT);
-            this.discard();
-        }
-    }
-
-    @Override protected void onHitEntity(EntityHitResult r) {
-        super.onHitEntity(r);
-        if (r.getEntity() == getOwner()) return;
-        if (!this.level().isClientSide) { r.getEntity().hurt(this.damageSources().thrown(this, getOwner()), dmg); boom(); }
-    }
-    @Override protected void onHitBlock(BlockHitResult r) { super.onHitBlock(r); boom(); }
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/network/ModNetwork.java"
-package com.arsenalmod.network;
-
-import com.arsenalmod.ArsenalMod;
+import com.mojang.math.Axis;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.*;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraft.util.Mth;
 
-public class ModNetwork {
-    private static final String V = "2";
-    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(ArsenalMod.MODID, "main"), () -> V, V::equals, V::equals);
+public class BulletRenderer extends EntityRenderer<BulletEntity> {
+    public BulletRenderer(EntityRendererProvider.Context ctx) {
+        super(ctx);
+    }
 
-    public static void register() {
-        int id = 0;
-        INSTANCE.messageBuilder(C2SShootPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(C2SShootPacket::encode).decoder(C2SShootPacket::decode).consumerMainThread(C2SShootPacket::handle).add();
-        INSTANCE.messageBuilder(C2SReloadPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(C2SReloadPacket::encode).decoder(C2SReloadPacket::decode).consumerMainThread(C2SReloadPacket::handle).add();
-        INSTANCE.messageBuilder(S2CImpactPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(S2CImpactPacket::encode).decoder(S2CImpactPacket::decode).consumerMainThread(S2CImpactPacket::handle).add();
-        INSTANCE.messageBuilder(S2CHitmarkerPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(S2CHitmarkerPacket::encode).decoder(S2CHitmarkerPacket::decode).consumerMainThread(S2CHitmarkerPacket::handle).add();
+    @Override
+    public void render(BulletEntity entity, float entityYaw, float partialTick,
+                       PoseStack ps, MultiBufferSource buffer, int light) {
+        ps.pushPose();
+        float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
+        float pitch = Mth.lerp(partialTick, entity.xRotO, entity.getXRot());
+        ps.mulPose(Axis.YP.rotationDegrees(yaw));
+        ps.mulPose(Axis.XP.rotationDegrees(-pitch));
+        GunModelGeometry.renderBullet3D(ps, buffer);
+        ps.popPose();
+        super.render(entity, entityYaw, partialTick, ps, buffer, light);
+    }
+
+    @Override
+    public ResourceLocation getTextureLocation(BulletEntity entity) {
+        return GunModelGeometry.ATLAS;
     }
 }
 ARSENAL_V2_EOF
 
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/network/C2SShootPacket.java"
-package com.arsenalmod.network;
-
-import com.arsenalmod.entity.*;
-import com.arsenalmod.item.*;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.*;
-import net.minecraft.sounds.*;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkEvent;
-import java.util.function.Supplier;
-
-public class C2SShootPacket {
-    private final boolean aiming;
-    public C2SShootPacket(boolean aiming) { this.aiming = aiming; }
-    public static void encode(C2SShootPacket m, FriendlyByteBuf b) { b.writeBoolean(m.aiming); }
-    public static C2SShootPacket decode(FriendlyByteBuf b) { return new C2SShootPacket(b.readBoolean()); }
-
-    public static void handle(C2SShootPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ServerPlayer p = ctx.get().getSender();
-        if (p == null) return;
-        ItemStack st = p.getMainHandItem();
-        if (!(st.getItem() instanceof GunItem gun)) return;
-
-        ServerLevel lvl = p.serverLevel();
-        long now = lvl.getGameTime();
-        GunType t = gun.getType();
-        if (gun.isReloading(st, now) || now - gun.getLastShot(st) < t.fireCooldown) return;
-        int ammo = gun.getAmmo(st);
-        if (ammo <= 0) { gun.startReload(st, p); return; }
-
-        gun.setAmmo(st, ammo - 1);
-        gun.setLastShot(st, now);
-
-        Vec3 eye = p.getEyePosition(), look = p.getLookAngle();
-        float spread = msg.aiming ? t.spread * 0.22F : t.spread;
-
-        if (t.isRocket) {
-            RocketEntity r = new RocketEntity(lvl, p, t.damage);
-            Vec3 sp = eye.add(look.scale(0.9));
-            r.setPos(sp.x, sp.y - 0.08, sp.z);
-            r.shoot(look.x, look.y, look.z, t.bulletSpeed, spread);
-            lvl.addFreshEntity(r);
-        } else {
-            for (int i = 0; i < t.pellets; i++) {
-                BulletEntity b = new BulletEntity(lvl, p, t.damage, t.armorPen);
-                Vec3 sp = eye.add(look.scale(0.55));
-                b.setPos(sp.x, sp.y - 0.05, sp.z);
-                b.shoot(look.x, look.y, look.z, t.bulletSpeed, spread);
-                lvl.addFreshEntity(b);
-            }
-        }
-        sound(lvl, p, t);
-        Vec3 mz = eye.add(look.scale(1.15));
-        lvl.sendParticles(ParticleTypes.SMOKE, mz.x, mz.y - 0.08, mz.z, t.isRocket ? 18 : 6, 0.09, 0.09, 0.09, 0.05);
-        lvl.sendParticles(ParticleTypes.FLAME, mz.x, mz.y - 0.08, mz.z, t.isRocket ? 12 : 3, 0.05, 0.05, 0.05, 0.04);
-    }
-
-    private static void sound(ServerLevel l, ServerPlayer p, GunType t) {
-        double x = p.getX(), y = p.getY(), z = p.getZ();
-        switch (t) {
-            case GLOCK19 -> { l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_BLAST,SoundSource.PLAYERS,1.0F,1.85F); l.playSound(null,x,y,z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,0.22F,2.0F); }
-            case AK47 -> { l.playSound(null,x,y,z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,0.58F,1.32F); l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_BLAST,SoundSource.PLAYERS,1.1F,1.12F); }
-            case M4A1 -> { l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_BLAST,SoundSource.PLAYERS,0.75F,1.72F); l.playSound(null,x,y,z,SoundEvents.IRON_TRAPDOOR_CLOSE,SoundSource.PLAYERS,0.55F,1.95F); }
-            case SPAS12 -> { l.playSound(null,x,y,z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,1.0F,0.85F); l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_LARGE_BLAST,SoundSource.PLAYERS,1.15F,0.82F); }
-            case AWP_SNIPER -> { l.playSound(null,x,y,z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,1.3F,0.70F); l.playSound(null,x,y,z,SoundEvents.LIGHTNING_BOLT_THUNDER,SoundSource.PLAYERS,0.38F,2.0F); }
-            case MINIGUN -> { l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_BLAST,SoundSource.PLAYERS,0.75F,1.35F); l.playSound(null,x,y,z,SoundEvents.PISTON_EXTEND,SoundSource.PLAYERS,0.35F,2.0F); }
-            case RPG7 -> { l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_LAUNCH,SoundSource.PLAYERS,1.6F,0.6F); l.playSound(null,x,y,z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,0.9F,0.65F); }
-        }
-    }
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/network/C2SReloadPacket.java"
-package com.arsenalmod.network;
-
-import com.arsenalmod.item.GunItem;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
-import java.util.function.Supplier;
-
-public class C2SReloadPacket {
-    public C2SReloadPacket() {}
-    public static void encode(C2SReloadPacket m, FriendlyByteBuf b) {}
-    public static C2SReloadPacket decode(FriendlyByteBuf b) { return new C2SReloadPacket(); }
-    public static void handle(C2SReloadPacket m, Supplier<NetworkEvent.Context> ctx) {
-        ServerPlayer p = ctx.get().getSender();
-        if (p != null) { ItemStack s = p.getMainHandItem(); if (s.getItem() instanceof GunItem g) g.startReload(s, p); }
-    }
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/network/S2CImpactPacket.java"
-package com.arsenalmod.network;
-
-import com.arsenalmod.client.WorldEffectsRenderer;
-import net.minecraft.core.Direction;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import java.util.function.Supplier;
-
-public class S2CImpactPacket {
-    public final double x, y, z;
-    public final int dir;
-    public S2CImpactPacket(double x, double y, double z, int dir) { this.x = x; this.y = y; this.z = z; this.dir = dir; }
-    public static void encode(S2CImpactPacket m, FriendlyByteBuf b) { b.writeDouble(m.x); b.writeDouble(m.y); b.writeDouble(m.z); b.writeByte(m.dir); }
-    public static S2CImpactPacket decode(FriendlyByteBuf b) { return new S2CImpactPacket(b.readDouble(), b.readDouble(), b.readDouble(), b.readByte()); }
-    public static void handle(S2CImpactPacket m, Supplier<NetworkEvent.Context> ctx) {
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> WorldEffectsRenderer.addBulletHole(m.x, m.y, m.z, Direction.from3DDataValue(m.dir)));
-    }
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/network/S2CHitmarkerPacket.java"
-package com.arsenalmod.network;
-
-import com.arsenalmod.client.GunAnimationEngine;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import java.util.function.Supplier;
-
-public class S2CHitmarkerPacket {
-    public final boolean headshot, kill;
-    public S2CHitmarkerPacket(boolean hs, boolean k) { this.headshot = hs; this.kill = k; }
-    public static void encode(S2CHitmarkerPacket m, FriendlyByteBuf b) { b.writeBoolean(m.headshot); b.writeBoolean(m.kill); }
-    public static S2CHitmarkerPacket decode(FriendlyByteBuf b) { return new S2CHitmarkerPacket(b.readBoolean(), b.readBoolean()); }
-    public static void handle(S2CHitmarkerPacket m, Supplier<NetworkEvent.Context> ctx) {
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> GunAnimationEngine.triggerHitmarker(m.headshot, m.kill));
-    }
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/WorldEffectsRenderer.java"
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/ClientEvents.java"
 package com.arsenalmod.client;
 
 import com.arsenalmod.ArsenalMod;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Axis;
-import net.minecraft.client.Camera;
+import com.arsenalmod.item.GunItem;
+import com.arsenalmod.item.GunType;
+import com.arsenalmod.network.C2SReloadPacket;
+import com.arsenalmod.network.C2SShootPacket;
+import com.arsenalmod.network.ModNetwork;
+import com.arsenalmod.registry.ModItems;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
-import org.joml.*;
-import java.util.*;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
-public class WorldEffectsRenderer {
-    public static final ResourceLocation HOLE_TEX = new ResourceLocation(ArsenalMod.MODID, "textures/entity/bullet_hole.png");
+@Mod.EventBusSubscriber(modid = ArsenalMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+public class ClientEvents {
+    private static boolean wasAttackDown = false;
+    private static long nextLocalShotTick = 0L;
 
-    private static class BulletHole {
-        double x, y, z; Direction dir; float roll, age;
-        BulletHole(double x, double y, double z, Direction d) {
-            this.x = x; this.y = y; this.z = z; this.dir = d;
-            this.roll = (float)(Math.random() * 360.0);
+    @SubscribeEvent
+    public static void onRenderTick(TickEvent.RenderTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            GunAnimationEngine.updateFrame();
         }
     }
 
-    private static class ShellCasing {
-        double x, y, z, vx, vy, vz; float rx, ry, vrx, vry, age; boolean shotgun;
-        ShellCasing(double x, double y, double z, double vx, double vy, double vz, boolean sh) {
-            this.x = x; this.y = y; this.z = z; this.vx = vx; this.vy = vy; this.vz = vz;
-            this.shotgun = sh;
-            this.vrx = (float)(420 + Math.random() * 480);
-            this.vry = (float)(280 + Math.random() * 420);
+    @SubscribeEvent
+    public static void onRenderLevelStage(RenderLevelStageEvent event) {
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
+            WorldEffectsRenderer.render(event.getPoseStack(), event.getCamera(), event.getPartialTick());
         }
     }
 
-    private static class Tracer {
-        Vec3 a, b; float age;
-        Tracer(Vec3 a, Vec3 b) { this.a = a; this.b = b; }
-    }
-
-    private static final List<BulletHole> HOLES = new ArrayList<>();
-    private static final List<ShellCasing> SHELLS = new ArrayList<>();
-    private static final List<Tracer> TRACERS = new ArrayList<>();
-    private static long lastNano = System.nanoTime();
-
-    public static void addBulletHole(double x, double y, double z, Direction dir) {
-        if (HOLES.size() >= 180) HOLES.remove(0);
-        HOLES.add(new BulletHole(x, y, z, dir));
-    }
-
-    public static void spawnShell(Vec3 pos, Vec3 right, Vec3 up, Vec3 look, boolean shotgun) {
-        if (SHELLS.size() >= 90) SHELLS.remove(0);
-        double spd = 2.0 + Math.random() * 1.1;
-        Vec3 v = right.scale(spd).add(up.scale(1.1 + Math.random() * 0.7)).add(look.scale(-0.35 + (Math.random() - 0.5) * 0.4));
-        SHELLS.add(new ShellCasing(pos.x, pos.y, pos.z, v.x, v.y, v.z, shotgun));
-    }
-
-    public static void spawnTracer(Vec3 start, Vec3 end) {
-        if (TRACERS.size() >= 40) TRACERS.remove(0);
-        TRACERS.add(new Tracer(start, end));
-    }
-
-    public static void render(PoseStack ps, Camera cam, float partialTick) {
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
-        Level lvl = mc.level;
-        if (lvl == null) return;
-
-        long now = System.nanoTime();
-        float dt = Math.min(0.05F, (now - lastNano) / 1_000_000_000.0F);
-        lastNano = now;
-
-        Vec3 cp = cam.getPosition();
-        MultiBufferSource.BufferSource bs = mc.renderBuffers().bufferSource();
-
-        // 1. Update & Render 3D Bullet Holes on Blocks
-        if (!HOLES.isEmpty()) {
-            VertexConsumer vc = bs.getBuffer(RenderType.entityTranslucent(HOLE_TEX));
-            Iterator<BulletHole> it = HOLES.iterator();
-            while (it.hasNext()) {
-                BulletHole h = it.next();
-                h.age += dt;
-                if (h.age > 24.0F) { it.remove(); continue; }
-                int alpha = h.age > 20.0F ? (int)(255 * (1.0F - (h.age - 20.0F) / 4.0F)) : 255;
-                int light = LevelRenderer.getLightColor(lvl, BlockPos.containing(
-                        h.x + h.dir.getStepX() * 0.1, h.y + h.dir.getStepY() * 0.1, h.z + h.dir.getStepZ() * 0.1));
-
-                ps.pushPose();
-                ps.translate(h.x - cp.x + h.dir.getStepX() * 0.008,
-                             h.y - cp.y + h.dir.getStepY() * 0.008,
-                             h.z - cp.z + h.dir.getStepZ() * 0.008);
-                switch (h.dir) {
-                    case UP -> ps.mulPose(Axis.XP.rotationDegrees(-90));
-                    case DOWN -> ps.mulPose(Axis.XP.rotationDegrees(90));
-                    case NORTH -> ps.mulPose(Axis.YP.rotationDegrees(180));
-                    case EAST -> ps.mulPose(Axis.YP.rotationDegrees(90));
-                    case WEST -> ps.mulPose(Axis.YP.rotationDegrees(-90));
-                    default -> {}
-                }
-                ps.mulPose(Axis.ZP.rotationDegrees(h.roll));
-                PoseStack.Pose pose = ps.last();
-                Matrix4f m = pose.pose(); Matrix3f n = pose.normal();
-                float r = 0.095F;
-                vc.vertex(m, -r, -r, 0).color(255,255,255,alpha).uv(0,1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n,0,0,1).endVertex();
-                vc.vertex(m,  r, -r, 0).color(255,255,255,alpha).uv(1,1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n,0,0,1).endVertex();
-                vc.vertex(m,  r,  r, 0).color(255,255,255,alpha).uv(1,0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n,0,0,1).endVertex();
-                vc.vertex(m, -r,  r, 0).color(255,255,255,alpha).uv(0,0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n,0,0,1).endVertex();
-                ps.popPose();
-            }
-            bs.endBatch(RenderType.entityTranslucent(HOLE_TEX));
+        LocalPlayer player = mc.player;
+        if (player == null || mc.screen != null) {
+            GunAnimationEngine.isAiming = false;
+            wasAttackDown = false;
+            return;
         }
 
-        // 2. Update & Render 3D Spinning Ejecting Shell Casings & Luminous Tracers
-        if (!SHELLS.isEmpty() || !TRACERS.isEmpty()) {
-            VertexConsumer vc = bs.getBuffer(RenderType.entityCutoutNoCull(GunModelGeometry.ATLAS));
-            Iterator<ShellCasing> sit = SHELLS.iterator();
-            while (sit.hasNext()) {
-                ShellCasing s = sit.next();
-                s.age += dt;
-                if (s.age > 5.0F) { sit.remove(); continue; }
-                s.vy -= 14.5 * dt;
-                double nx = s.x + s.vx * dt, ny = s.y + s.vy * dt, nz = s.z + s.vz * dt;
-                if (lvl.getBlockState(BlockPos.containing(nx, ny - 0.03, nz)).blocksMotion()) {
-                    s.vy = -s.vy * 0.35; s.vx *= 0.55; s.vz *= 0.55; s.vrx *= 0.4F; s.vry *= 0.4F;
-                } else { s.x = nx; s.y = ny; s.z = nz; }
-                s.rx += s.vrx * dt; s.ry += s.vry * dt;
-
-                int light = LevelRenderer.getLightColor(lvl, BlockPos.containing(s.x, s.y, s.z));
-                ps.pushPose();
-                ps.translate(s.x - cp.x, s.y - cp.y, s.z - cp.z);
-                ps.mulPose(Axis.YP.rotationDegrees(s.ry));
-                ps.mulPose(Axis.XP.rotationDegrees(s.rx));
-                if (s.shotgun) {
-                    GunModelGeometry.cyl(ps, vc, light, OverlayTexture.NO_OVERLAY, GunModelGeometry.T_RED_HULL, 0, 0, 0.25F, 0.24F, 0.24F, 0.9F, 2);
-                    GunModelGeometry.cyl(ps, vc, light, OverlayTexture.NO_OVERLAY, GunModelGeometry.T_BRASS, 0, 0, -0.35F, 0.25F, 0.25F, 0.35F, 2);
-                } else {
-                    GunModelGeometry.cyl(ps, vc, light, OverlayTexture.NO_OVERLAY, GunModelGeometry.T_BRASS, 0, 0, 0, 0.14F, 0.14F, 0.65F, 2);
-                }
-                ps.popPose();
-            }
-
-            Iterator<Tracer> tit = TRACERS.iterator();
-            while (tit.hasNext()) {
-                Tracer tr = tit.next();
-                tr.age += dt;
-                if (tr.age > 0.075F) { tit.remove(); continue; }
-                Vec3 dir = tr.b.subtract(tr.a);
-                double len = Math.min(28.0, dir.length());
-                if (len < 0.2) continue;
-                Vec3 d = dir.normalize();
-                double hz = Math.sqrt(d.x * d.x + d.z * d.z);
-                float yaw = (float)(Math.atan2(d.x, d.z) * 180.0 / Math.PI);
-                float pitch = (float)(Math.atan2(d.y, hz) * 180.0 / Math.PI);
-                Vec3 mid = tr.a.add(d.scale(len * 0.5));
-                ps.pushPose();
-                ps.translate(mid.x - cp.x, mid.y - cp.y, mid.z - cp.z);
-                ps.mulPose(Axis.YP.rotationDegrees(yaw));
-                ps.mulPose(Axis.XP.rotationDegrees(-pitch));
-                GunModelGeometry.box(ps, vc, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
-                        GunModelGeometry.T_MUZZLE_FLASH, 0, 0, 0, 0.22F, 0.22F, (float)(len * 16.0));
-                ps.popPose();
-            }
-            bs.endBatch(RenderType.entityCutoutNoCull(GunModelGeometry.ATLAS));
+        ItemStack stack = player.getMainHandItem();
+        if (!(stack.getItem() instanceof GunItem gun)) {
+            GunAnimationEngine.isAiming = false;
+            wasAttackDown = false;
+            return;
         }
+
+        GunType type = gun.getType();
+        long now = player.level().getGameTime();
+
+        // ADS (Right Click)
+        GunAnimationEngine.isAiming = mc.options.keyUse.isDown();
+
+        // Reload (R key)
+        while (ModKeyBindings.RELOAD_KEY.consumeClick()) {
+            ModNetwork.INSTANCE.sendToServer(new C2SReloadPacket());
+        }
+
+        // Fire (Left Click)
+        boolean attackDown = mc.options.keyAttack.isDown();
+        boolean triggerPressed = type.fullAuto ? attackDown : (attackDown && !wasAttackDown);
+        wasAttackDown = attackDown;
+
+        if (triggerPressed && !gun.isReloading(stack, now) && now >= nextLocalShotTick) {
+            int ammo = gun.getAmmo(stack);
+            if (ammo > 0) {
+                nextLocalShotTick = now + type.fireCooldown;
+                GunAnimationEngine.onLocalShot(type, player);
+                ModNetwork.INSTANCE.sendToServer(new C2SShootPacket(GunAnimationEngine.isAiming));
+            } else {
+                nextLocalShotTick = now + 10L;
+                ModNetwork.INSTANCE.sendToServer(new C2SReloadPacket());
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onClickInput(InputEvent.InteractionKeyMappingTriggered event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        if (mc.player.getMainHandItem().getItem() instanceof GunItem) {
+            if (event.isAttack() || event.isUseItem()) {
+                event.setCanceled(true);
+                event.setSwingHand(false);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onComputeFov(ViewportEvent.ComputeFov event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        ItemStack stack = mc.player.getMainHandItem();
+        if (!(stack.getItem() instanceof GunItem gun)) return;
+        if (GunAnimationEngine.ads > 0.001F) {
+            double baseFov = event.getFOV();
+            event.setFOV(Mth.lerp(GunAnimationEngine.ads, baseFov, baseFov * gun.getType().adsFov));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderGuiOverlayPre(RenderGuiOverlayEvent.Pre event) {
+        if (!event.getOverlay().id().equals(VanillaGuiOverlay.CROSSHAIR.id())) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && mc.player.getMainHandItem().getItem() instanceof GunItem) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onRenderGuiOverlayPost(RenderGuiOverlayEvent.Post event) {
+        if (!event.getOverlay().id().equals(VanillaGuiOverlay.HOTBAR.id())) return;
+        Minecraft mc = Minecraft.getInstance();
+        LocalPlayer player = mc.player;
+        if (player == null || mc.options.hideGui) return;
+
+        GuiGraphics gg = event.getGuiGraphics();
+        int w = event.getWindow().getGuiScaledWidth();
+        int h = event.getWindow().getGuiScaledHeight();
+
+        ItemStack stack = player.getMainHandItem();
+        if (stack.getItem() instanceof GunItem gun) {
+            GunType type = gun.getType();
+            if (type.isSniper && GunAnimationEngine.ads > 0.85F) {
+                renderSniperScope(gg, w, h);
+            } else if (GunAnimationEngine.ads < 0.65F) {
+                renderCrosshair(gg, w, h, type);
+            }
+            renderWeaponHud(gg, mc, player, stack, gun, w, h);
+        }
+
+        // FPS Hitmarker (renders even right after switching/scoping)
+        if (GunAnimationEngine.hitTimer > 0.0F) {
+            renderHitmarker(gg, w, h);
+        }
+    }
+
+    private static void renderHitmarker(GuiGraphics gg, int w, int h) {
+        int cx = w / 2;
+        int cy = h / 2;
+        float t = Mth.clamp(GunAnimationEngine.hitTimer / 0.26F, 0.0F, 1.0F);
+        int alpha = (int) (t * 255.0F) & 0xFF;
+        int rgb = GunAnimationEngine.hitKill ? 0xFF2222 : (GunAnimationEngine.hitHead ? 0xFFD700 : 0xFFFFFF);
+        int col = (alpha << 24) | rgb;
+        int start = GunAnimationEngine.hitHead ? 4 : 3;
+        int end = GunAnimationEngine.hitKill ? 11 : (GunAnimationEngine.hitHead ? 10 : 8);
+
+        for (int i = start; i <= end; i++) {
+            gg.fill(cx - i, cy - i, cx - i + 2, cy - i + 2, col);
+            gg.fill(cx + i - 1, cy - i, cx + i + 1, cy - i + 2, col);
+            gg.fill(cx - i, cy + i - 1, cx - i + 2, cy + i + 1, col);
+            gg.fill(cx + i - 1, cy + i - 1, cx + i + 1, cy + i + 1, col);
+        }
+    }
+
+    private static void renderSniperScope(GuiGraphics gg, int w, int h) {
+        int cx = w / 2;
+        int cy = h / 2;
+        int radius = Math.min(w, h) * 44 / 100;
+        int black = 0xFF000000;
+
+        gg.fill(0, 0, w, cy - radius, black);
+        gg.fill(0, cy + radius, w, h, black);
+
+        for (int dy = -radius; dy < radius; dy += 2) {
+            double norm = dy / (double) radius;
+            int halfSpan = (int) (radius * Math.sqrt(Math.max(0.0, 1.0 - norm * norm)));
+            int y0 = cy + dy;
+            int y1 = Math.min(cy + radius, y0 + 2);
+            gg.fill(0, y0, cx - halfSpan, y1, black);
+            gg.fill(cx + halfSpan, y0, w, y1, black);
+        }
+
+        int lineColor = 0xD8000000;
+        gg.fill(cx - radius, cy, cx + radius, cy + 1, lineColor);
+        gg.fill(cx, cy - radius, cx + 1, cy + radius, lineColor);
+
+        int postOffset = radius / 2;
+        gg.fill(cx - radius, cy - 1, cx - postOffset, cy + 2, black);
+        gg.fill(cx + postOffset, cy - 1, cx + radius, cy + 2, black);
+        gg.fill(cx - 1, cy + postOffset, cx + 2, cy + radius, black);
+
+        int step = Math.max(8, radius / 9);
+        for (int i = 1; i <= 4; i++) {
+            int off = i * step;
+            gg.fill(cx - off, cy - 3, cx - off + 1, cy + 4, lineColor);
+            gg.fill(cx + off, cy - 3, cx + off + 1, cy + 4, lineColor);
+            gg.fill(cx - 3, cy - off, cx + 4, cy - off + 1, lineColor);
+            gg.fill(cx - 3, cy + off, cx + 4, cy + off + 1, lineColor);
+        }
+
+        gg.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFFFF2222);
+    }
+
+    private static void renderCrosshair(GuiGraphics gg, int w, int h, GunType type) {
+        int cx = w / 2;
+        int cy = h / 2;
+        int gap = (int) (4 + type.spread * 1.4F + Math.max(0.0F, GunAnimationEngine.recZ) * 40.0F);
+        int len = 6;
+        int col = 0xE6FFFFFF;
+        int shadow = 0x99000000;
+
+        gg.fill(cx - gap - len - 1, cy - 1, cx - gap + 1, cy + 2, shadow);
+        gg.fill(cx + gap, cy - 1, cx + gap + len + 2, cy + 2, shadow);
+        gg.fill(cx - 1, cy - gap - len - 1, cx + 2, cy - gap + 1, shadow);
+        gg.fill(cx - 1, cy + gap, cx + 2, cy + gap + len + 2, shadow);
+
+        gg.fill(cx - gap - len, cy, cx - gap, cy + 1, col);
+        gg.fill(cx + gap + 1, cy, cx + gap + len + 1, cy + 1, col);
+        gg.fill(cx, cy - gap - len, cx + 1, cy - gap, col);
+        gg.fill(cx, cy + gap + 1, cx + 1, cy + gap + len + 1, col);
+        gg.fill(cx, cy, cx + 1, cy + 1, 0xFFFF4444);
+    }
+
+    private static void renderWeaponHud(GuiGraphics gg, Minecraft mc, LocalPlayer player,
+                                        ItemStack stack, GunItem gun, int w, int h) {
+        GunType type = gun.getType();
+        long now = player.level().getGameTime();
+        int ammo = gun.getAmmo(stack);
+        boolean reloading = gun.isReloading(stack, now);
+
+        int boxW = 134;
+        int boxH = 40;
+        int x = w - boxW - 10;
+        int y = h - boxH - 10;
+
+        gg.fill(x, y, x + boxW, y + boxH, 0xB40E1318);
+        gg.fill(x, y, x + boxW, y + 1, 0xFF475569);
+        gg.fill(x, y + boxH - 1, x + boxW, y + boxH, 0xFF475569);
+        gg.fill(x, y, x + 2, y + boxH, 0xFFEAB308);
+
+        String mode = type.isRocket ? "HEAT" : (type.fullAuto ? "AUTO" : "SEMI");
+        gg.drawString(mc.font, type.displayName, x + 7, y + 5, 0xFFF8FAFC, true);
+        gg.drawString(mc.font, mode, x + boxW - mc.font.width(mode) - 6, y + 5, 0xFF94A3B8, false);
+
+        if (reloading) {
+            float prog = gun.getReloadProgress(stack, now, mc.getFrameTime());
+            gg.drawString(mc.font, "RECARREGANDO...", x + 7, y + 17, 0xFFFACC15, true);
+            int barX = x + 7;
+            int barY = y + 30;
+            int barW = boxW - 14;
+            gg.fill(barX, barY, barX + barW, barY + 4, 0xFF1E293B);
+            gg.fill(barX, barY, barX + (int) (barW * prog), barY + 4, 0xFFEAB308);
+        } else {
+            int ammoColor = (ammo == 0) ? 0xFFEF4444 : (ammo <= Math.max(1, type.maxAmmo / 4) ? 0xFFF59E0B : 0xFFFFFFFF);
+            String ammoTxt = ammo + " / " + type.maxAmmo;
+            gg.drawString(mc.font, ammoTxt, x + 7, y + 20, ammoColor, true);
+
+            String reserveTxt;
+            if (player.isCreative()) {
+                reserveTxt = "INF";
+            } else {
+                Item ammoItem = ModItems.getAmmoItem(type.ammoKind);
+                int packs = 0;
+                for (ItemStack inv : player.getInventory().items) {
+                    if (inv.is(ammoItem)) packs += inv.getCount();
+                }
+                reserveTxt = "RES: " + (packs * type.roundsPerAmmoItem);
+            }
+            gg.drawString(mc.font, reserveTxt, x + boxW - mc.font.width(reserveTxt) - 6, y + 20, 0xFFCBD5E1, false);
+        }
+    }
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/ClientModEvents.java"
+package com.arsenalmod.client;
+
+import com.arsenalmod.ArsenalMod;
+import com.arsenalmod.registry.ModEntities;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+@Mod.EventBusSubscriber(modid = ArsenalMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+public class ClientModEvents {
+    @SubscribeEvent
+    public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
+        event.register(ModKeyBindings.RELOAD_KEY);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntities.BULLET.get(), BulletRenderer::new);
+        event.registerEntityRenderer(ModEntities.ROCKET.get(), RocketRenderer::new);
     }
 }
 ARSENAL_V2_EOF
@@ -1215,6 +678,92 @@ public class GunAnimationEngine {
 }
 ARSENAL_V2_EOF
 
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/GunItemRenderer.java"
+package com.arsenalmod.client;
+
+import com.arsenalmod.item.GunItem;
+import com.arsenalmod.item.GunType;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+
+public class GunItemRenderer extends BlockEntityWithoutLevelRenderer {
+
+    public GunItemRenderer() {
+        super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
+    }
+
+    @Override
+    public void renderByItem(ItemStack stack, ItemDisplayContext ctx, PoseStack ps,
+                             MultiBufferSource buffer, int light, int overlay) {
+        if (!(stack.getItem() instanceof GunItem gun)) return;
+        GunType type = gun.getType();
+        int ammo = gun.getAmmo(stack);
+
+        boolean firstPerson = (ctx == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
+                || ctx == ItemDisplayContext.FIRST_PERSON_LEFT_HAND);
+
+        // Hide 3D sniper model when full-screen scope overlay is active
+        if (firstPerson && type.isSniper && GunAnimationEngine.ads > 0.85F) {
+            return;
+        }
+
+        Minecraft mc = Minecraft.getInstance();
+        boolean reloading = mc.player != null && gun.isReloading(stack, mc.player.level().getGameTime());
+
+        ps.pushPose();
+        ps.translate(0.5F, 0.5F, 0.5F);
+
+        if (ctx == ItemDisplayContext.GUI) {
+            float sc = switch (type) {
+                case GLOCK19 -> 1.32F;
+                case AK47, M4A1, SPAS12 -> 0.64F;
+                case AWP_SNIPER -> 0.50F;
+                case MINIGUN -> 0.56F;
+                case RPG7 -> 0.50F;
+            };
+            float zCenter = switch (type) {
+                case GLOCK19 -> 0.04F;
+                case AK47, M4A1, SPAS12 -> 0.16F;
+                case AWP_SNIPER -> 0.24F;
+                case MINIGUN -> 0.18F;
+                case RPG7 -> 0.14F;
+            };
+            ps.mulPose(Axis.ZP.rotationDegrees(22.0F));
+            ps.mulPose(Axis.XP.rotationDegrees(14.0F));
+            ps.mulPose(Axis.YP.rotationDegrees(-78.0F));
+            ps.scale(sc, sc, sc);
+            ps.translate(0.0F, -0.05F, zCenter);
+        } else if (ctx == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND
+                || ctx == ItemDisplayContext.THIRD_PERSON_LEFT_HAND) {
+            float sc = switch (type) {
+                case GLOCK19 -> 0.82F;
+                case MINIGUN, RPG7 -> 0.68F;
+                default -> 0.76F;
+            };
+            ps.translate(0.0F, 0.12F, 0.05F);
+            ps.scale(sc, sc, sc);
+        } else if (ctx == ItemDisplayContext.GROUND) {
+            float sc = (type == GunType.GLOCK19) ? 0.85F : 0.55F;
+            ps.translate(0.0F, 0.08F, 0.0F);
+            ps.scale(sc, sc, sc);
+        } else if (ctx == ItemDisplayContext.FIXED) {
+            float sc = (type == GunType.GLOCK19) ? 1.15F : 0.58F;
+            ps.mulPose(Axis.YP.rotationDegrees(-90.0F));
+            ps.scale(sc, sc, sc);
+            ps.translate(0.0F, -0.04F, 0.15F);
+        }
+
+        GunModelGeometry.renderGun(type, ps, buffer, light, overlay, firstPerson, ammo, reloading);
+        ps.popPose();
+    }
+}
+ARSENAL_V2_EOF
+
 cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/GunModelGeometry.java"
 package com.arsenalmod.client;
 
@@ -1226,7 +775,8 @@ import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import org.joml.*;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 public class GunModelGeometry {
     public static final ResourceLocation ATLAS = new ResourceLocation(ArsenalMod.MODID, "textures/entity/weapons_atlas.png");
@@ -1728,126 +1278,22 @@ public class GunModelGeometry {
 }
 ARSENAL_V2_EOF
 
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/GunItemRenderer.java"
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/ModKeyBindings.java"
 package com.arsenalmod.client;
 
-import com.arsenalmod.item.GunItem;
-import com.arsenalmod.item.GunType;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
+import net.minecraftforge.client.settings.KeyConflictContext;
+import org.lwjgl.glfw.GLFW;
 
-public class GunItemRenderer extends BlockEntityWithoutLevelRenderer {
-
-    public GunItemRenderer() {
-        super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
-    }
-
-    @Override
-    public void renderByItem(ItemStack stack, ItemDisplayContext ctx, PoseStack ps,
-                             MultiBufferSource buffer, int light, int overlay) {
-        if (!(stack.getItem() instanceof GunItem gun)) return;
-        GunType type = gun.getType();
-        int ammo = gun.getAmmo(stack);
-
-        boolean firstPerson = (ctx == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
-                || ctx == ItemDisplayContext.FIRST_PERSON_LEFT_HAND);
-
-        // Hide 3D sniper model when full-screen scope overlay is active
-        if (firstPerson && type.isSniper && GunAnimationEngine.ads > 0.85F) {
-            return;
-        }
-
-        Minecraft mc = Minecraft.getInstance();
-        boolean reloading = mc.player != null && gun.isReloading(stack, mc.player.level().getGameTime());
-
-        ps.pushPose();
-        ps.translate(0.5F, 0.5F, 0.5F);
-
-        if (ctx == ItemDisplayContext.GUI) {
-            float sc = switch (type) {
-                case GLOCK19 -> 1.32F;
-                case AK47, M4A1, SPAS12 -> 0.64F;
-                case AWP_SNIPER -> 0.50F;
-                case MINIGUN -> 0.56F;
-                case RPG7 -> 0.50F;
-            };
-            float zCenter = switch (type) {
-                case GLOCK19 -> 0.04F;
-                case AK47, M4A1, SPAS12 -> 0.16F;
-                case AWP_SNIPER -> 0.24F;
-                case MINIGUN -> 0.18F;
-                case RPG7 -> 0.14F;
-            };
-            ps.mulPose(Axis.ZP.rotationDegrees(22.0F));
-            ps.mulPose(Axis.XP.rotationDegrees(14.0F));
-            ps.mulPose(Axis.YP.rotationDegrees(-78.0F));
-            ps.scale(sc, sc, sc);
-            ps.translate(0.0F, -0.05F, zCenter);
-        } else if (ctx == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND
-                || ctx == ItemDisplayContext.THIRD_PERSON_LEFT_HAND) {
-            float sc = switch (type) {
-                case GLOCK19 -> 0.82F;
-                case MINIGUN, RPG7 -> 0.68F;
-                default -> 0.76F;
-            };
-            ps.translate(0.0F, 0.12F, 0.05F);
-            ps.scale(sc, sc, sc);
-        } else if (ctx == ItemDisplayContext.GROUND) {
-            float sc = (type == GunType.GLOCK19) ? 0.85F : 0.55F;
-            ps.translate(0.0F, 0.08F, 0.0F);
-            ps.scale(sc, sc, sc);
-        } else if (ctx == ItemDisplayContext.FIXED) {
-            float sc = (type == GunType.GLOCK19) ? 1.15F : 0.58F;
-            ps.mulPose(Axis.YP.rotationDegrees(-90.0F));
-            ps.scale(sc, sc, sc);
-            ps.translate(0.0F, -0.04F, 0.15F);
-        }
-
-        GunModelGeometry.renderGun(type, ps, buffer, light, overlay, firstPerson, ammo, reloading);
-        ps.popPose();
-    }
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/BulletRenderer.java"
-package com.arsenalmod.client;
-
-import com.arsenalmod.entity.BulletEntity;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-
-public class BulletRenderer extends EntityRenderer<BulletEntity> {
-    public BulletRenderer(EntityRendererProvider.Context ctx) {
-        super(ctx);
-    }
-
-    @Override
-    public void render(BulletEntity entity, float entityYaw, float partialTick,
-                       PoseStack ps, MultiBufferSource buffer, int light) {
-        ps.pushPose();
-        float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
-        float pitch = Mth.lerp(partialTick, entity.xRotO, entity.getXRot());
-        ps.mulPose(Axis.YP.rotationDegrees(yaw));
-        ps.mulPose(Axis.XP.rotationDegrees(-pitch));
-        GunModelGeometry.renderBullet3D(ps, buffer);
-        ps.popPose();
-        super.render(entity, entityYaw, partialTick, ps, buffer, light);
-    }
-
-    @Override
-    public ResourceLocation getTextureLocation(BulletEntity entity) {
-        return GunModelGeometry.ATLAS;
-    }
+public class ModKeyBindings {
+    public static final KeyMapping RELOAD_KEY = new KeyMapping(
+            "key.arsenalmod.reload",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_R,
+            "key.categories.arsenalmod"
+    );
 }
 ARSENAL_V2_EOF
 
@@ -1888,330 +1334,848 @@ public class RocketRenderer extends EntityRenderer<RocketEntity> {
 }
 ARSENAL_V2_EOF
 
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/ModKeyBindings.java"
-package com.arsenalmod.client;
-
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.KeyMapping;
-import net.minecraftforge.client.settings.KeyConflictContext;
-import org.lwjgl.glfw.GLFW;
-
-public class ModKeyBindings {
-    public static final KeyMapping RELOAD_KEY = new KeyMapping(
-            "key.arsenalmod.reload",
-            KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_R,
-            "key.categories.arsenalmod"
-    );
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/ClientModEvents.java"
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/WorldEffectsRenderer.java"
 package com.arsenalmod.client;
 
 import com.arsenalmod.ArsenalMod;
-import com.arsenalmod.registry.ModEntities;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-
-@Mod.EventBusSubscriber(modid = ArsenalMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public class ClientModEvents {
-    @SubscribeEvent
-    public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
-        event.register(ModKeyBindings.RELOAD_KEY);
-    }
-
-    @SubscribeEvent
-    public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntities.BULLET.get(), BulletRenderer::new);
-        event.registerEntityRenderer(ModEntities.ROCKET.get(), RocketRenderer::new);
-    }
-}
-ARSENAL_V2_EOF
-
-cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/client/ClientEvents.java"
-package com.arsenalmod.client;
-
-import com.arsenalmod.ArsenalMod;
-import com.arsenalmod.item.GunItem;
-import com.arsenalmod.item.GunType;
-import com.arsenalmod.network.C2SReloadPacket;
-import com.arsenalmod.network.C2SShootPacket;
-import com.arsenalmod.network.ModNetwork;
-import com.arsenalmod.registry.ModItems;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Axis;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.util.Mth;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import java.util.*;
 
-@Mod.EventBusSubscriber(modid = ArsenalMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
-public class ClientEvents {
-    private static boolean wasAttackDown = false;
-    private static long nextLocalShotTick = 0L;
+public class WorldEffectsRenderer {
+    public static final ResourceLocation HOLE_TEX = new ResourceLocation(ArsenalMod.MODID, "textures/entity/bullet_hole.png");
 
-    @SubscribeEvent
-    public static void onRenderTick(TickEvent.RenderTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
-            GunAnimationEngine.updateFrame();
+    private static class BulletHole {
+        double x, y, z; Direction dir; float roll, age;
+        BulletHole(double x, double y, double z, Direction d) {
+            this.x = x; this.y = y; this.z = z; this.dir = d;
+            this.roll = (float)(Math.random() * 360.0);
         }
     }
 
-    @SubscribeEvent
-    public static void onRenderLevelStage(RenderLevelStageEvent event) {
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
-            WorldEffectsRenderer.render(event.getPoseStack(), event.getCamera(), event.getPartialTick());
+    private static class ShellCasing {
+        double x, y, z, vx, vy, vz; float rx, ry, vrx, vry, age; boolean shotgun;
+        ShellCasing(double x, double y, double z, double vx, double vy, double vz, boolean sh) {
+            this.x = x; this.y = y; this.z = z; this.vx = vx; this.vy = vy; this.vz = vz;
+            this.shotgun = sh;
+            this.vrx = (float)(420 + Math.random() * 480);
+            this.vry = (float)(280 + Math.random() * 420);
         }
     }
 
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    private static class Tracer {
+        Vec3 a, b; float age;
+        Tracer(Vec3 a, Vec3 b) { this.a = a; this.b = b; }
+    }
+
+    private static final List<BulletHole> HOLES = new ArrayList<>();
+    private static final List<ShellCasing> SHELLS = new ArrayList<>();
+    private static final List<Tracer> TRACERS = new ArrayList<>();
+    private static long lastNano = System.nanoTime();
+
+    public static void addBulletHole(double x, double y, double z, Direction dir) {
+        if (HOLES.size() >= 180) HOLES.remove(0);
+        HOLES.add(new BulletHole(x, y, z, dir));
+    }
+
+    public static void spawnShell(Vec3 pos, Vec3 right, Vec3 up, Vec3 look, boolean shotgun) {
+        if (SHELLS.size() >= 90) SHELLS.remove(0);
+        double spd = 2.0 + Math.random() * 1.1;
+        Vec3 v = right.scale(spd).add(up.scale(1.1 + Math.random() * 0.7)).add(look.scale(-0.35 + (Math.random() - 0.5) * 0.4));
+        SHELLS.add(new ShellCasing(pos.x, pos.y, pos.z, v.x, v.y, v.z, shotgun));
+    }
+
+    public static void spawnTracer(Vec3 start, Vec3 end) {
+        if (TRACERS.size() >= 40) TRACERS.remove(0);
+        TRACERS.add(new Tracer(start, end));
+    }
+
+    public static void render(PoseStack ps, Camera cam, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
-        LocalPlayer player = mc.player;
-        if (player == null || mc.screen != null) {
-            GunAnimationEngine.isAiming = false;
-            wasAttackDown = false;
-            return;
-        }
+        Level lvl = mc.level;
+        if (lvl == null) return;
 
-        ItemStack stack = player.getMainHandItem();
-        if (!(stack.getItem() instanceof GunItem gun)) {
-            GunAnimationEngine.isAiming = false;
-            wasAttackDown = false;
-            return;
-        }
+        long now = System.nanoTime();
+        float dt = Math.min(0.05F, (now - lastNano) / 1_000_000_000.0F);
+        lastNano = now;
 
-        GunType type = gun.getType();
-        long now = player.level().getGameTime();
+        Vec3 cp = cam.getPosition();
+        MultiBufferSource.BufferSource bs = mc.renderBuffers().bufferSource();
 
-        // ADS (Right Click)
-        GunAnimationEngine.isAiming = mc.options.keyUse.isDown();
+        // 1. Update & Render 3D Bullet Holes on Blocks
+        if (!HOLES.isEmpty()) {
+            VertexConsumer vc = bs.getBuffer(RenderType.entityTranslucent(HOLE_TEX));
+            Iterator<BulletHole> it = HOLES.iterator();
+            while (it.hasNext()) {
+                BulletHole h = it.next();
+                h.age += dt;
+                if (h.age > 24.0F) { it.remove(); continue; }
+                int alpha = h.age > 20.0F ? (int)(255 * (1.0F - (h.age - 20.0F) / 4.0F)) : 255;
+                int light = LevelRenderer.getLightColor(lvl, BlockPos.containing(
+                        h.x + h.dir.getStepX() * 0.1, h.y + h.dir.getStepY() * 0.1, h.z + h.dir.getStepZ() * 0.1));
 
-        // Reload (R key)
-        while (ModKeyBindings.RELOAD_KEY.consumeClick()) {
-            ModNetwork.INSTANCE.sendToServer(new C2SReloadPacket());
-        }
-
-        // Fire (Left Click)
-        boolean attackDown = mc.options.keyAttack.isDown();
-        boolean triggerPressed = type.fullAuto ? attackDown : (attackDown && !wasAttackDown);
-        wasAttackDown = attackDown;
-
-        if (triggerPressed && !gun.isReloading(stack, now) && now >= nextLocalShotTick) {
-            int ammo = gun.getAmmo(stack);
-            if (ammo > 0) {
-                nextLocalShotTick = now + type.fireCooldown;
-                GunAnimationEngine.onLocalShot(type, player);
-                ModNetwork.INSTANCE.sendToServer(new C2SShootPacket(GunAnimationEngine.isAiming));
-            } else {
-                nextLocalShotTick = now + 10L;
-                ModNetwork.INSTANCE.sendToServer(new C2SReloadPacket());
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onClickInput(InputEvent.InteractionKeyMappingTriggered event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        if (mc.player.getMainHandItem().getItem() instanceof GunItem) {
-            if (event.isAttack() || event.isUseItem()) {
-                event.setCanceled(true);
-                event.setSwingHand(false);
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onComputeFov(ViewportEvent.ComputeFov event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-        ItemStack stack = mc.player.getMainHandItem();
-        if (!(stack.getItem() instanceof GunItem gun)) return;
-        if (GunAnimationEngine.ads > 0.001F) {
-            double baseFov = event.getFOV();
-            event.setFOV(Mth.lerp(GunAnimationEngine.ads, baseFov, baseFov * gun.getType().adsFov));
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderGuiOverlayPre(RenderGuiOverlayEvent.Pre event) {
-        if (!event.getOverlay().id().equals(VanillaGuiOverlay.CROSSHAIR.id())) return;
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null && mc.player.getMainHandItem().getItem() instanceof GunItem) {
-            event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderGuiOverlayPost(RenderGuiOverlayEvent.Post event) {
-        if (!event.getOverlay().id().equals(VanillaGuiOverlay.HOTBAR.id())) return;
-        Minecraft mc = Minecraft.getInstance();
-        LocalPlayer player = mc.player;
-        if (player == null || mc.options.hideGui) return;
-
-        GuiGraphics gg = event.getGuiGraphics();
-        int w = event.getWindow().getGuiScaledWidth();
-        int h = event.getWindow().getGuiScaledHeight();
-
-        ItemStack stack = player.getMainHandItem();
-        if (stack.getItem() instanceof GunItem gun) {
-            GunType type = gun.getType();
-            if (type.isSniper && GunAnimationEngine.ads > 0.85F) {
-                renderSniperScope(gg, w, h);
-            } else if (GunAnimationEngine.ads < 0.65F) {
-                renderCrosshair(gg, w, h, type);
-            }
-            renderWeaponHud(gg, mc, player, stack, gun, w, h);
-        }
-
-        // FPS Hitmarker (renders even right after switching/scoping)
-        if (GunAnimationEngine.hitTimer > 0.0F) {
-            renderHitmarker(gg, w, h);
-        }
-    }
-
-    private static void renderHitmarker(GuiGraphics gg, int w, int h) {
-        int cx = w / 2;
-        int cy = h / 2;
-        float t = Mth.clamp(GunAnimationEngine.hitTimer / 0.26F, 0.0F, 1.0F);
-        int alpha = (int) (t * 255.0F) & 0xFF;
-        int rgb = GunAnimationEngine.hitKill ? 0xFF2222 : (GunAnimationEngine.hitHead ? 0xFFD700 : 0xFFFFFF);
-        int col = (alpha << 24) | rgb;
-        int start = GunAnimationEngine.hitHead ? 4 : 3;
-        int end = GunAnimationEngine.hitKill ? 11 : (GunAnimationEngine.hitHead ? 10 : 8);
-
-        for (int i = start; i <= end; i++) {
-            gg.fill(cx - i, cy - i, cx - i + 2, cy - i + 2, col);
-            gg.fill(cx + i - 1, cy - i, cx + i + 1, cy - i + 2, col);
-            gg.fill(cx - i, cy + i - 1, cx - i + 2, cy + i + 1, col);
-            gg.fill(cx + i - 1, cy + i - 1, cx + i + 1, cy + i + 1, col);
-        }
-    }
-
-    private static void renderSniperScope(GuiGraphics gg, int w, int h) {
-        int cx = w / 2;
-        int cy = h / 2;
-        int radius = Math.min(w, h) * 44 / 100;
-        int black = 0xFF000000;
-
-        gg.fill(0, 0, w, cy - radius, black);
-        gg.fill(0, cy + radius, w, h, black);
-
-        for (int dy = -radius; dy < radius; dy += 2) {
-            double norm = dy / (double) radius;
-            int halfSpan = (int) (radius * Math.sqrt(Math.max(0.0, 1.0 - norm * norm)));
-            int y0 = cy + dy;
-            int y1 = Math.min(cy + radius, y0 + 2);
-            gg.fill(0, y0, cx - halfSpan, y1, black);
-            gg.fill(cx + halfSpan, y0, w, y1, black);
-        }
-
-        int lineColor = 0xD8000000;
-        gg.fill(cx - radius, cy, cx + radius, cy + 1, lineColor);
-        gg.fill(cx, cy - radius, cx + 1, cy + radius, lineColor);
-
-        int postOffset = radius / 2;
-        gg.fill(cx - radius, cy - 1, cx - postOffset, cy + 2, black);
-        gg.fill(cx + postOffset, cy - 1, cx + radius, cy + 2, black);
-        gg.fill(cx - 1, cy + postOffset, cx + 2, cy + radius, black);
-
-        int step = Math.max(8, radius / 9);
-        for (int i = 1; i <= 4; i++) {
-            int off = i * step;
-            gg.fill(cx - off, cy - 3, cx - off + 1, cy + 4, lineColor);
-            gg.fill(cx + off, cy - 3, cx + off + 1, cy + 4, lineColor);
-            gg.fill(cx - 3, cy - off, cx + 4, cy - off + 1, lineColor);
-            gg.fill(cx - 3, cy + off, cx + 4, cy + off + 1, lineColor);
-        }
-
-        gg.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFFFF2222);
-    }
-
-    private static void renderCrosshair(GuiGraphics gg, int w, int h, GunType type) {
-        int cx = w / 2;
-        int cy = h / 2;
-        int gap = (int) (4 + type.spread * 1.4F + Math.max(0.0F, GunAnimationEngine.recZ) * 40.0F);
-        int len = 6;
-        int col = 0xE6FFFFFF;
-        int shadow = 0x99000000;
-
-        gg.fill(cx - gap - len - 1, cy - 1, cx - gap + 1, cy + 2, shadow);
-        gg.fill(cx + gap, cy - 1, cx + gap + len + 2, cy + 2, shadow);
-        gg.fill(cx - 1, cy - gap - len - 1, cx + 2, cy - gap + 1, shadow);
-        gg.fill(cx - 1, cy + gap, cx + 2, cy + gap + len + 2, shadow);
-
-        gg.fill(cx - gap - len, cy, cx - gap, cy + 1, col);
-        gg.fill(cx + gap + 1, cy, cx + gap + len + 1, cy + 1, col);
-        gg.fill(cx, cy - gap - len, cx + 1, cy - gap, col);
-        gg.fill(cx, cy + gap + 1, cx + 1, cy + gap + len + 1, col);
-        gg.fill(cx, cy, cx + 1, cy + 1, 0xFFFF4444);
-    }
-
-    private static void renderWeaponHud(GuiGraphics gg, Minecraft mc, LocalPlayer player,
-                                        ItemStack stack, GunItem gun, int w, int h) {
-        GunType type = gun.getType();
-        long now = player.level().getGameTime();
-        int ammo = gun.getAmmo(stack);
-        boolean reloading = gun.isReloading(stack, now);
-
-        int boxW = 134;
-        int boxH = 40;
-        int x = w - boxW - 10;
-        int y = h - boxH - 10;
-
-        gg.fill(x, y, x + boxW, y + boxH, 0xB40E1318);
-        gg.fill(x, y, x + boxW, y + 1, 0xFF475569);
-        gg.fill(x, y + boxH - 1, x + boxW, y + boxH, 0xFF475569);
-        gg.fill(x, y, x + 2, y + boxH, 0xFFEAB308);
-
-        String mode = type.isRocket ? "HEAT" : (type.fullAuto ? "AUTO" : "SEMI");
-        gg.drawString(mc.font, type.displayName, x + 7, y + 5, 0xFFF8FAFC, true);
-        gg.drawString(mc.font, mode, x + boxW - mc.font.width(mode) - 6, y + 5, 0xFF94A3B8, false);
-
-        if (reloading) {
-            float prog = gun.getReloadProgress(stack, now, mc.getFrameTime());
-            gg.drawString(mc.font, "RECARREGANDO...", x + 7, y + 17, 0xFFFACC15, true);
-            int barX = x + 7;
-            int barY = y + 30;
-            int barW = boxW - 14;
-            gg.fill(barX, barY, barX + barW, barY + 4, 0xFF1E293B);
-            gg.fill(barX, barY, barX + (int) (barW * prog), barY + 4, 0xFFEAB308);
-        } else {
-            int ammoColor = (ammo == 0) ? 0xFFEF4444 : (ammo <= Math.max(1, type.maxAmmo / 4) ? 0xFFF59E0B : 0xFFFFFFFF);
-            String ammoTxt = ammo + " / " + type.maxAmmo;
-            gg.drawString(mc.font, ammoTxt, x + 7, y + 20, ammoColor, true);
-
-            String reserveTxt;
-            if (player.isCreative()) {
-                reserveTxt = "INF";
-            } else {
-                Item ammoItem = ModItems.getAmmoItem(type.ammoKind);
-                int packs = 0;
-                for (ItemStack inv : player.getInventory().items) {
-                    if (inv.is(ammoItem)) packs += inv.getCount();
+                ps.pushPose();
+                ps.translate(h.x - cp.x + h.dir.getStepX() * 0.008,
+                             h.y - cp.y + h.dir.getStepY() * 0.008,
+                             h.z - cp.z + h.dir.getStepZ() * 0.008);
+                switch (h.dir) {
+                    case UP -> ps.mulPose(Axis.XP.rotationDegrees(-90));
+                    case DOWN -> ps.mulPose(Axis.XP.rotationDegrees(90));
+                    case NORTH -> ps.mulPose(Axis.YP.rotationDegrees(180));
+                    case EAST -> ps.mulPose(Axis.YP.rotationDegrees(90));
+                    case WEST -> ps.mulPose(Axis.YP.rotationDegrees(-90));
+                    default -> {}
                 }
-                reserveTxt = "RES: " + (packs * type.roundsPerAmmoItem);
+                ps.mulPose(Axis.ZP.rotationDegrees(h.roll));
+                PoseStack.Pose pose = ps.last();
+                Matrix4f m = pose.pose(); Matrix3f n = pose.normal();
+                float r = 0.095F;
+                vc.vertex(m, -r, -r, 0).color(255,255,255,alpha).uv(0,1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n,0,0,1).endVertex();
+                vc.vertex(m,  r, -r, 0).color(255,255,255,alpha).uv(1,1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n,0,0,1).endVertex();
+                vc.vertex(m,  r,  r, 0).color(255,255,255,alpha).uv(1,0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n,0,0,1).endVertex();
+                vc.vertex(m, -r,  r, 0).color(255,255,255,alpha).uv(0,0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n,0,0,1).endVertex();
+                ps.popPose();
             }
-            gg.drawString(mc.font, reserveTxt, x + boxW - mc.font.width(reserveTxt) - 6, y + 20, 0xFFCBD5E1, false);
+            bs.endBatch(RenderType.entityTranslucent(HOLE_TEX));
+        }
+
+        // 2. Update & Render 3D Spinning Ejecting Shell Casings & Luminous Tracers
+        if (!SHELLS.isEmpty() || !TRACERS.isEmpty()) {
+            VertexConsumer vc = bs.getBuffer(RenderType.entityCutoutNoCull(GunModelGeometry.ATLAS));
+            Iterator<ShellCasing> sit = SHELLS.iterator();
+            while (sit.hasNext()) {
+                ShellCasing s = sit.next();
+                s.age += dt;
+                if (s.age > 5.0F) { sit.remove(); continue; }
+                s.vy -= 14.5 * dt;
+                double nx = s.x + s.vx * dt, ny = s.y + s.vy * dt, nz = s.z + s.vz * dt;
+                if (lvl.getBlockState(BlockPos.containing(nx, ny - 0.03, nz)).blocksMotion()) {
+                    s.vy = -s.vy * 0.35; s.vx *= 0.55; s.vz *= 0.55; s.vrx *= 0.4F; s.vry *= 0.4F;
+                } else { s.x = nx; s.y = ny; s.z = nz; }
+                s.rx += s.vrx * dt; s.ry += s.vry * dt;
+
+                int light = LevelRenderer.getLightColor(lvl, BlockPos.containing(s.x, s.y, s.z));
+                ps.pushPose();
+                ps.translate(s.x - cp.x, s.y - cp.y, s.z - cp.z);
+                ps.mulPose(Axis.YP.rotationDegrees(s.ry));
+                ps.mulPose(Axis.XP.rotationDegrees(s.rx));
+                if (s.shotgun) {
+                    GunModelGeometry.cyl(ps, vc, light, OverlayTexture.NO_OVERLAY, GunModelGeometry.T_RED_HULL, 0, 0, 0.25F, 0.24F, 0.24F, 0.9F, 2);
+                    GunModelGeometry.cyl(ps, vc, light, OverlayTexture.NO_OVERLAY, GunModelGeometry.T_BRASS, 0, 0, -0.35F, 0.25F, 0.25F, 0.35F, 2);
+                } else {
+                    GunModelGeometry.cyl(ps, vc, light, OverlayTexture.NO_OVERLAY, GunModelGeometry.T_BRASS, 0, 0, 0, 0.14F, 0.14F, 0.65F, 2);
+                }
+                ps.popPose();
+            }
+
+            Iterator<Tracer> tit = TRACERS.iterator();
+            while (tit.hasNext()) {
+                Tracer tr = tit.next();
+                tr.age += dt;
+                if (tr.age > 0.075F) { tit.remove(); continue; }
+                Vec3 dir = tr.b.subtract(tr.a);
+                double len = Math.min(28.0, dir.length());
+                if (len < 0.2) continue;
+                Vec3 d = dir.normalize();
+                double hz = Math.sqrt(d.x * d.x + d.z * d.z);
+                float yaw = (float)(Math.atan2(d.x, d.z) * 180.0 / Math.PI);
+                float pitch = (float)(Math.atan2(d.y, hz) * 180.0 / Math.PI);
+                Vec3 mid = tr.a.add(d.scale(len * 0.5));
+                ps.pushPose();
+                ps.translate(mid.x - cp.x, mid.y - cp.y, mid.z - cp.z);
+                ps.mulPose(Axis.YP.rotationDegrees(yaw));
+                ps.mulPose(Axis.XP.rotationDegrees(-pitch));
+                GunModelGeometry.box(ps, vc, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
+                        GunModelGeometry.T_MUZZLE_FLASH, 0, 0, 0, 0.22F, 0.22F, (float)(len * 16.0));
+                ps.popPose();
+            }
+            bs.endBatch(RenderType.entityCutoutNoCull(GunModelGeometry.ATLAS));
         }
     }
 }
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/entity/BulletEntity.java"
+package com.arsenalmod.entity;
+
+import com.arsenalmod.network.*;
+import com.arsenalmod.registry.ModEntities;
+import net.minecraft.core.particles.*;
+import net.minecraft.server.level.*;
+import net.minecraft.sounds.*;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.*;
+import net.minecraftforge.network.PacketDistributor;
+
+public class BulletEntity extends ThrowableProjectile {
+    private float damage = 14.0F;
+    private float armorPen = 0.35F;
+
+    public BulletEntity(EntityType<? extends BulletEntity> type, Level level) { super(type, level); }
+    public BulletEntity(Level level, LivingEntity shooter, float damage, float armorPen) {
+        super(ModEntities.BULLET.get(), shooter, level);
+        this.damage = damage;
+        this.armorPen = armorPen;
+    }
+
+    @Override protected void defineSynchedData() {}
+    @Override protected float getGravity() { return 0.005F; }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.level().isClientSide) {
+            this.level().addParticle(ParticleTypes.SMOKE, getX(), getY(), getZ(), 0, 0, 0);
+        }
+        if (this.tickCount > 70) this.discard();
+    }
+
+    @Override
+    protected void onHitEntity(EntityHitResult res) {
+        super.onHitEntity(res);
+        Entity target = res.getEntity(), owner = this.getOwner();
+        if (target == owner || this.level().isClientSide) return;
+
+        double relY = (res.getLocation().y - target.getY()) / Math.max(0.2, target.getBbHeight());
+        boolean headshot = relY >= 0.72;
+        float zoneMul = headshot ? 2.2F : (relY < 0.32 ? 0.78F : 1.0F);
+        float finalDmg = this.damage * zoneMul;
+
+        // Realistic armor penetration scaling
+        if (target instanceof LivingEntity living) {
+            float armor = living.getArmorValue();
+            if (armor > 0) finalDmg *= (1.0F + this.armorPen * (armor / 16.0F));
+        }
+
+        target.invulnerableTime = 0;
+        boolean hurt = target.hurt(this.damageSources().thrown(this, owner), finalDmg);
+        boolean killed = target instanceof LivingEntity lv && lv.isDeadOrDying();
+
+        if (hurt && owner instanceof ServerPlayer sp) {
+            ModNetwork.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), new S2CHitmarkerPacket(headshot, killed));
+            sp.playNotifySound(headshot ? SoundEvents.EXPERIENCE_ORB_PICKUP : SoundEvents.ARROW_HIT_PLAYER,
+                    SoundSource.PLAYERS, 0.7F, headshot ? 1.9F : 1.4F);
+        }
+        if (this.level() instanceof ServerLevel sl) {
+            Vec3 h = res.getLocation();
+            sl.sendParticles(headshot ? ParticleTypes.CRIT : ParticleTypes.DAMAGE_INDICATOR, h.x, h.y, h.z, headshot ? 12 : 5, 0.12, 0.12, 0.12, 0.22);
+            sl.sendParticles(ParticleTypes.SMOKE, h.x, h.y, h.z, 3, 0.05, 0.05, 0.05, 0.05);
+        }
+        this.discard();
+    }
+
+    @Override
+    protected void onHitBlock(BlockHitResult res) {
+        super.onHitBlock(res);
+        if (!this.level().isClientSide && this.level() instanceof ServerLevel sl) {
+            Vec3 h = res.getLocation();
+            BlockState st = sl.getBlockState(res.getBlockPos());
+            sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, st), h.x, h.y, h.z, 10, 0.08, 0.08, 0.08, 0.18);
+            sl.sendParticles(ParticleTypes.CRIT, h.x, h.y, h.z, 6, 0.05, 0.05, 0.05, 0.2);
+            sl.sendParticles(ParticleTypes.SMOKE, h.x, h.y, h.z, 4, 0.04, 0.04, 0.04, 0.03);
+            sl.playSound(null, h.x, h.y, h.z, st.getSoundType().getHitSound(), SoundSource.BLOCKS, 0.65F, 1.55F);
+            ModNetwork.INSTANCE.send(
+                    PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(h.x, h.y, h.z, 96.0, sl.dimension())),
+                    new S2CImpactPacket(h.x, h.y, h.z, res.getDirection().get3DDataValue())
+            );
+            this.discard();
+        }
+    }
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/entity/RocketEntity.java"
+package com.arsenalmod.entity;
+
+import com.arsenalmod.registry.ModEntities;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.*;
+
+public class RocketEntity extends ThrowableProjectile {
+    private float dmg = 80.0F;
+    public RocketEntity(EntityType<? extends RocketEntity> t, Level l) { super(t, l); }
+    public RocketEntity(Level l, LivingEntity s, float dmg) { super(ModEntities.ROCKET.get(), s, l); this.dmg = dmg; }
+
+    @Override protected void defineSynchedData() {}
+    @Override protected float getGravity() { return 0.008F; }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.level().isClientSide) {
+            Vec3 m = getDeltaMovement();
+            for (int i = 0; i < 4; i++) {
+                double f = i * 0.25;
+                this.level().addParticle(ParticleTypes.FLAME, getX()-m.x*f, getY()-m.y*f, getZ()-m.z*f,
+                        (random.nextDouble()-0.5)*0.07, (random.nextDouble()-0.5)*0.07, (random.nextDouble()-0.5)*0.07);
+            }
+            this.level().addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, getX()-m.x*0.5, getY()-m.y*0.5, getZ()-m.z*0.5, 0, 0.03, 0);
+        }
+        if (this.tickCount > 120) boom();
+    }
+
+    private void boom() {
+        if (!this.level().isClientSide) {
+            if (this.level() instanceof ServerLevel sl) {
+                sl.sendParticles(ParticleTypes.EXPLOSION_EMITTER, getX(), getY(), getZ(), 3, 0.5, 0.5, 0.5, 0);
+                sl.sendParticles(ParticleTypes.FLAME, getX(), getY(), getZ(), 50, 1.2, 1.2, 1.2, 0.3);
+                sl.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY(), getZ(), 30, 1.0, 1.0, 1.0, 0.15);
+            }
+            this.level().explode(this, getX(), getY(), getZ(), 5.5F, Level.ExplosionInteraction.TNT);
+            this.discard();
+        }
+    }
+
+    @Override protected void onHitEntity(EntityHitResult r) {
+        super.onHitEntity(r);
+        if (r.getEntity() == getOwner()) return;
+        if (!this.level().isClientSide) { r.getEntity().hurt(this.damageSources().thrown(this, getOwner()), dmg); boom(); }
+    }
+    @Override protected void onHitBlock(BlockHitResult r) { super.onHitBlock(r); boom(); }
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/item/GunItem.java"
+package com.arsenalmod.item;
+
+import com.arsenalmod.client.GunAnimationEngine;
+import com.arsenalmod.client.GunItemRenderer;
+import com.arsenalmod.registry.ModItems;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.*;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.function.Consumer;
+
+public class GunItem extends Item {
+    public static final String TAG_AMMO = "Ammo", TAG_REL = "Rel", TAG_RS = "RS", TAG_RE = "RE", TAG_LAST = "Last";
+    private final GunType type;
+
+    public GunItem(GunType type) { super(new Item.Properties().stacksTo(1)); this.type = type; }
+    public GunType getType() { return type; }
+
+    public int getAmmo(ItemStack s) {
+        CompoundTag t = s.getTag();
+        return (t == null || !t.contains(TAG_AMMO)) ? type.maxAmmo : t.getInt(TAG_AMMO);
+    }
+    public void setAmmo(ItemStack s, int a) { s.getOrCreateTag().putInt(TAG_AMMO, Mth.clamp(a, 0, type.maxAmmo)); }
+    public long getLastShot(ItemStack s) { return s.getTag() == null ? -1000L : s.getTag().getLong(TAG_LAST); }
+    public void setLastShot(ItemStack s, long tick) { s.getOrCreateTag().putLong(TAG_LAST, tick); }
+
+    public boolean isReloading(ItemStack s, long now) {
+        CompoundTag t = s.getTag();
+        return t != null && t.getBoolean(TAG_REL) && now <= t.getLong(TAG_RE) + 2L;
+    }
+    public float getReloadProgress(ItemStack s, long now, float pt) {
+        CompoundTag t = s.getTag();
+        if (t == null || !t.getBoolean(TAG_REL)) return 0F;
+        long st = t.getLong(TAG_RS), en = t.getLong(TAG_RE);
+        return en <= st ? 0F : Mth.clamp(((now + pt) - st) / (float)(en - st), 0F, 1F);
+    }
+
+    public boolean hasReserve(Player p) {
+        if (p.isCreative()) return true;
+        Item a = ModItems.getAmmoItem(type.ammoKind);
+        for (ItemStack st : p.getInventory().items) if (st.is(a) && !st.isEmpty()) return true;
+        return false;
+    }
+
+    public void startReload(ItemStack s, Player p) {
+        long now = p.level().getGameTime();
+        if (isReloading(s, now) || getAmmo(s) >= type.maxAmmo) return;
+        if (!hasReserve(p)) {
+            p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.DISPENSER_FAIL, SoundSource.PLAYERS, 0.6F, 1.5F);
+            return;
+        }
+        CompoundTag t = s.getOrCreateTag();
+        t.putBoolean(TAG_REL, true); t.putLong(TAG_RS, now); t.putLong(TAG_RE, now + type.reloadTicks);
+        p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.IRON_TRAPDOOR_OPEN, SoundSource.PLAYERS, 0.5F, 1.85F);
+    }
+
+    @Override
+    public void inventoryTick(ItemStack s, Level lvl, Entity e, int slot, boolean sel) {
+        if (lvl.isClientSide || !(e instanceof Player p)) return;
+        CompoundTag t = s.getTag();
+        if (t == null) { setAmmo(s, type.maxAmmo); return; }
+        if (t.getBoolean(TAG_REL)) {
+            if (!sel) { t.putBoolean(TAG_REL, false); return; }
+            if (lvl.getGameTime() >= t.getLong(TAG_RE)) {
+                t.putBoolean(TAG_REL, false);
+                if (p.isCreative()) setAmmo(s, type.maxAmmo);
+                else {
+                    int cur = getAmmo(s), need = type.maxAmmo - cur, got = 0;
+                    Item a = ModItems.getAmmoItem(type.ammoKind);
+                    for (ItemStack inv : p.getInventory().items) {
+                        if (got >= need) break;
+                        if (inv.is(a)) while (!inv.isEmpty() && got < need) { inv.shrink(1); got += type.roundsPerAmmoItem; }
+                    }
+                    setAmmo(s, Math.min(type.maxAmmo, cur + got));
+                }
+                lvl.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PISTON_CONTRACT, SoundSource.PLAYERS, 0.55F, 1.9F);
+            }
+        }
+    }
+
+    @Override public boolean canAttackBlock(BlockState st, Level l, BlockPos pos, Player p) { return false; }
+    @Override public boolean shouldCauseReequipAnimation(ItemStack o, ItemStack n, boolean sc) { return sc || o.getItem() != n.getItem(); }
+    @Override public InteractionResultHolder<ItemStack> use(Level l, Player p, InteractionHand h) { return InteractionResultHolder.pass(p.getItemInHand(h)); }
+
+    @Override
+    public void appendHoverText(ItemStack s, @Nullable Level l, List<Component> tip, TooltipFlag f) {
+        String dmg = type.pellets > 1 ? String.format("%.1f x%d", type.damage, type.pellets) : String.format("%.1f", type.damage);
+        tip.add(Component.literal("Municao: " + getAmmo(s) + "/" + type.maxAmmo + " | Dano: " + dmg).withStyle(ChatFormatting.GOLD));
+        tip.add(Component.literal("Perf. Armadura: " + Math.round(type.armorPen * 100) + "% | Headshot 2.2x").withStyle(ChatFormatting.RED));
+        tip.add(Component.literal("[Esq] Atirar  [Dir] Mirar  [R] Recarregar").withStyle(ChatFormatting.AQUA));
+    }
+
+    @Override
+    public void initializeClient(Consumer<IClientItemExtensions> c) {
+        c.accept(new IClientItemExtensions() {
+            private GunItemRenderer r;
+            @Override public BlockEntityWithoutLevelRenderer getCustomRenderer() { return r == null ? (r = new GunItemRenderer()) : r; }
+            @Override public boolean applyForgeHandTransform(PoseStack ps, LocalPlayer p, HumanoidArm arm, ItemStack s, float pt, float eq, float sw) {
+                return GunAnimationEngine.applyFirstPersonTransform(ps, p, arm, s, pt, eq);
+            }
+            @Override public HumanoidModel.ArmPose getArmPose(LivingEntity e, InteractionHand h, ItemStack s) { return HumanoidModel.ArmPose.BOW_AND_ARROW; }
+        });
+    }
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/item/GunType.java"
+package com.arsenalmod.item;
+
+public enum GunType {
+    GLOCK19("glock19", "Glock 19", 12.0F, 0.22F, 5, 17, 32, false, 1, 1.1F, 6.0F,
+            0.095F, 5.2F, 1.1F, 0.86F, false, false, false, AmmoKind.PISTOL, 17, 2.55F, -5.2F, 1.65F),
+    AK47("ak47", "AK-47", 17.0F, 0.48F, 3, 30, 44, true, 1, 1.7F, 6.8F,
+            0.135F, 4.6F, 1.25F, 0.76F, false, false, false, AmmoKind.RIFLE, 15, 2.90F, -16.0F, 0.95F),
+    M4A1("m4a1", "M4A1 Tatica", 14.0F, 0.38F, 2, 30, 40, true, 1, 0.9F, 7.2F,
+            0.085F, 2.8F, 0.72F, 0.70F, false, false, false, AmmoKind.RIFLE, 15, 3.55F, -17.0F, 1.05F),
+    SPAS12("spas12", "SPAS-12", 6.5F, 0.20F, 15, 8, 48, false, 10, 6.2F, 5.4F,
+            0.28F, 12.5F, 3.6F, 0.84F, false, false, true, AmmoKind.SHOTGUN, 1, 2.65F, -14.8F, 1.35F),
+    AWP_SNIPER("awp_sniper", "AWP Sniper", 55.0F, 0.82F, 26, 5, 56, false, 1, 0.06F, 10.5F,
+            0.30F, 15.0F, 4.2F, 0.22F, false, true, false, AmmoKind.SNIPER, 1, 3.70F, -21.5F, 1.35F),
+    MINIGUN("minigun", "M134 Minigun", 11.0F, 0.45F, 1, 200, 68, true, 1, 2.9F, 6.8F,
+            0.065F, 1.7F, 0.48F, 0.85F, false, false, false, AmmoKind.RIFLE, 40, 2.60F, -16.5F, 0.45F),
+    RPG7("rpg7", "RPG-7", 80.0F, 0.95F, 28, 1, 60, false, 1, 0.28F, 2.8F,
+            0.40F, 17.5F, 5.0F, 0.76F, true, false, false, AmmoKind.ROCKET, 1, 3.35F, -17.5F, 1.2F);
+
+    public enum AmmoKind { PISTOL, RIFLE, SHOTGUN, SNIPER, ROCKET }
+
+    public final String id, displayName;
+    public final float damage, armorPen, spread, bulletSpeed, recoilKick, recoilPitch, cameraKick, adsFov;
+    public final float sightVoxelsY, muzzleVoxelsZ, muzzleVoxelsY;
+    public final int fireCooldown, maxAmmo, reloadTicks, pellets, roundsPerAmmoItem;
+    public final boolean fullAuto, isRocket, isSniper, isShotgun;
+    public final AmmoKind ammoKind;
+
+    GunType(String id, String displayName, float damage, float armorPen, int fireCooldown, int maxAmmo,
+            int reloadTicks, boolean fullAuto, int pellets, float spread, float bulletSpeed,
+            float recoilKick, float recoilPitch, float cameraKick, float adsFov,
+            boolean isRocket, boolean isSniper, boolean isShotgun, AmmoKind ammoKind,
+            int roundsPerAmmoItem, float sightVoxelsY, float muzzleVoxelsZ, float muzzleVoxelsY) {
+        this.id = id; this.displayName = displayName; this.damage = damage; this.armorPen = armorPen;
+        this.fireCooldown = fireCooldown; this.maxAmmo = maxAmmo; this.reloadTicks = reloadTicks;
+        this.fullAuto = fullAuto; this.pellets = pellets; this.spread = spread; this.bulletSpeed = bulletSpeed;
+        this.recoilKick = recoilKick; this.recoilPitch = recoilPitch; this.cameraKick = cameraKick;
+        this.adsFov = adsFov; this.isRocket = isRocket; this.isSniper = isSniper; this.isShotgun = isShotgun;
+        this.ammoKind = ammoKind; this.roundsPerAmmoItem = roundsPerAmmoItem;
+        this.sightVoxelsY = sightVoxelsY; this.muzzleVoxelsZ = muzzleVoxelsZ; this.muzzleVoxelsY = muzzleVoxelsY;
+    }
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/network/C2SReloadPacket.java"
+package com.arsenalmod.network;
+
+import com.arsenalmod.item.GunItem;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkEvent;
+import java.util.function.Supplier;
+
+public class C2SReloadPacket {
+    public C2SReloadPacket() {}
+    public static void encode(C2SReloadPacket m, FriendlyByteBuf b) {}
+    public static C2SReloadPacket decode(FriendlyByteBuf b) { return new C2SReloadPacket(); }
+    public static void handle(C2SReloadPacket m, Supplier<NetworkEvent.Context> ctx) {
+        ServerPlayer p = ctx.get().getSender();
+        if (p != null) { ItemStack s = p.getMainHandItem(); if (s.getItem() instanceof GunItem g) g.startReload(s, p); }
+    }
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/network/C2SShootPacket.java"
+package com.arsenalmod.network;
+
+import com.arsenalmod.entity.*;
+import com.arsenalmod.item.*;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.*;
+import net.minecraft.sounds.*;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.NetworkEvent;
+import java.util.function.Supplier;
+
+public class C2SShootPacket {
+    private final boolean aiming;
+    public C2SShootPacket(boolean aiming) { this.aiming = aiming; }
+    public static void encode(C2SShootPacket m, FriendlyByteBuf b) { b.writeBoolean(m.aiming); }
+    public static C2SShootPacket decode(FriendlyByteBuf b) { return new C2SShootPacket(b.readBoolean()); }
+
+    public static void handle(C2SShootPacket msg, Supplier<NetworkEvent.Context> ctx) {
+        ServerPlayer p = ctx.get().getSender();
+        if (p == null) return;
+        ItemStack st = p.getMainHandItem();
+        if (!(st.getItem() instanceof GunItem gun)) return;
+
+        ServerLevel lvl = p.serverLevel();
+        long now = lvl.getGameTime();
+        GunType t = gun.getType();
+        if (gun.isReloading(st, now) || now - gun.getLastShot(st) < t.fireCooldown) return;
+        int ammo = gun.getAmmo(st);
+        if (ammo <= 0) { gun.startReload(st, p); return; }
+
+        gun.setAmmo(st, ammo - 1);
+        gun.setLastShot(st, now);
+
+        Vec3 eye = p.getEyePosition(), look = p.getLookAngle();
+        float spread = msg.aiming ? t.spread * 0.22F : t.spread;
+
+        if (t.isRocket) {
+            RocketEntity r = new RocketEntity(lvl, p, t.damage);
+            Vec3 sp = eye.add(look.scale(0.9));
+            r.setPos(sp.x, sp.y - 0.08, sp.z);
+            r.shoot(look.x, look.y, look.z, t.bulletSpeed, spread);
+            lvl.addFreshEntity(r);
+        } else {
+            for (int i = 0; i < t.pellets; i++) {
+                BulletEntity b = new BulletEntity(lvl, p, t.damage, t.armorPen);
+                Vec3 sp = eye.add(look.scale(0.55));
+                b.setPos(sp.x, sp.y - 0.05, sp.z);
+                b.shoot(look.x, look.y, look.z, t.bulletSpeed, spread);
+                lvl.addFreshEntity(b);
+            }
+        }
+        sound(lvl, p, t);
+        Vec3 mz = eye.add(look.scale(1.15));
+        lvl.sendParticles(ParticleTypes.SMOKE, mz.x, mz.y - 0.08, mz.z, t.isRocket ? 18 : 6, 0.09, 0.09, 0.09, 0.05);
+        lvl.sendParticles(ParticleTypes.FLAME, mz.x, mz.y - 0.08, mz.z, t.isRocket ? 12 : 3, 0.05, 0.05, 0.05, 0.04);
+    }
+
+    private static void sound(ServerLevel l, ServerPlayer p, GunType t) {
+        double x = p.getX(), y = p.getY(), z = p.getZ();
+        switch (t) {
+            case GLOCK19 -> { l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_BLAST,SoundSource.PLAYERS,1.0F,1.85F); l.playSound(null,x,y,z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,0.22F,2.0F); }
+            case AK47 -> { l.playSound(null,x,y,z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,0.58F,1.32F); l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_BLAST,SoundSource.PLAYERS,1.1F,1.12F); }
+            case M4A1 -> { l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_BLAST,SoundSource.PLAYERS,0.75F,1.72F); l.playSound(null,x,y,z,SoundEvents.IRON_TRAPDOOR_CLOSE,SoundSource.PLAYERS,0.55F,1.95F); }
+            case SPAS12 -> { l.playSound(null,x,y,z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,1.0F,0.85F); l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_LARGE_BLAST,SoundSource.PLAYERS,1.15F,0.82F); }
+            case AWP_SNIPER -> { l.playSound(null,x,y,z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,1.3F,0.70F); l.playSound(null,x,y,z,SoundEvents.LIGHTNING_BOLT_THUNDER,SoundSource.PLAYERS,0.38F,2.0F); }
+            case MINIGUN -> { l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_BLAST,SoundSource.PLAYERS,0.75F,1.35F); l.playSound(null,x,y,z,SoundEvents.PISTON_EXTEND,SoundSource.PLAYERS,0.35F,2.0F); }
+            case RPG7 -> { l.playSound(null,x,y,z,SoundEvents.FIREWORK_ROCKET_LAUNCH,SoundSource.PLAYERS,1.6F,0.6F); l.playSound(null,x,y,z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,0.9F,0.65F); }
+        }
+    }
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/network/ModNetwork.java"
+package com.arsenalmod.network;
+
+import com.arsenalmod.ArsenalMod;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.*;
+import net.minecraftforge.network.simple.SimpleChannel;
+
+public class ModNetwork {
+    private static final String V = "2";
+    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
+            new ResourceLocation(ArsenalMod.MODID, "main"), () -> V, V::equals, V::equals);
+
+    public static void register() {
+        int id = 0;
+        INSTANCE.messageBuilder(C2SShootPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(C2SShootPacket::encode).decoder(C2SShootPacket::decode).consumerMainThread(C2SShootPacket::handle).add();
+        INSTANCE.messageBuilder(C2SReloadPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(C2SReloadPacket::encode).decoder(C2SReloadPacket::decode).consumerMainThread(C2SReloadPacket::handle).add();
+        INSTANCE.messageBuilder(S2CImpactPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(S2CImpactPacket::encode).decoder(S2CImpactPacket::decode).consumerMainThread(S2CImpactPacket::handle).add();
+        INSTANCE.messageBuilder(S2CHitmarkerPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(S2CHitmarkerPacket::encode).decoder(S2CHitmarkerPacket::decode).consumerMainThread(S2CHitmarkerPacket::handle).add();
+    }
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/network/S2CHitmarkerPacket.java"
+package com.arsenalmod.network;
+
+import com.arsenalmod.client.GunAnimationEngine;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkEvent;
+import java.util.function.Supplier;
+
+public class S2CHitmarkerPacket {
+    public final boolean headshot, kill;
+    public S2CHitmarkerPacket(boolean hs, boolean k) { this.headshot = hs; this.kill = k; }
+    public static void encode(S2CHitmarkerPacket m, FriendlyByteBuf b) { b.writeBoolean(m.headshot); b.writeBoolean(m.kill); }
+    public static S2CHitmarkerPacket decode(FriendlyByteBuf b) { return new S2CHitmarkerPacket(b.readBoolean(), b.readBoolean()); }
+    public static void handle(S2CHitmarkerPacket m, Supplier<NetworkEvent.Context> ctx) {
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> GunAnimationEngine.triggerHitmarker(m.headshot, m.kill));
+    }
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/network/S2CImpactPacket.java"
+package com.arsenalmod.network;
+
+import com.arsenalmod.client.WorldEffectsRenderer;
+import net.minecraft.core.Direction;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.network.NetworkEvent;
+import java.util.function.Supplier;
+
+public class S2CImpactPacket {
+    public final double x, y, z;
+    public final int dir;
+    public S2CImpactPacket(double x, double y, double z, int dir) { this.x = x; this.y = y; this.z = z; this.dir = dir; }
+    public static void encode(S2CImpactPacket m, FriendlyByteBuf b) { b.writeDouble(m.x); b.writeDouble(m.y); b.writeDouble(m.z); b.writeByte(m.dir); }
+    public static S2CImpactPacket decode(FriendlyByteBuf b) { return new S2CImpactPacket(b.readDouble(), b.readDouble(), b.readDouble(), b.readByte()); }
+    public static void handle(S2CImpactPacket m, Supplier<NetworkEvent.Context> ctx) {
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> WorldEffectsRenderer.addBulletHole(m.x, m.y, m.z, Direction.from3DDataValue(m.dir)));
+    }
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/registry/ModCreativeTabs.java"
+package com.arsenalmod.registry;
+
+import com.arsenalmod.ArsenalMod;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.*;
+import net.minecraftforge.registries.*;
+
+public class ModCreativeTabs {
+    public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, ArsenalMod.MODID);
+    public static final RegistryObject<CreativeModeTab> ARSENAL_TAB = TABS.register("arsenal_tab",
+            () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.arsenalmod.arsenal_tab"))
+                    .icon(() -> new ItemStack(ModItems.AK47.get()))
+                    .displayItems((p, out) -> {
+                        out.accept(ModItems.GLOCK19.get()); out.accept(ModItems.AK47.get());
+                        out.accept(ModItems.M4A1.get()); out.accept(ModItems.SPAS12.get());
+                        out.accept(ModItems.AWP_SNIPER.get()); out.accept(ModItems.MINIGUN.get());
+                        out.accept(ModItems.RPG7.get()); out.accept(ModItems.PISTOL_AMMO.get());
+                        out.accept(ModItems.RIFLE_AMMO.get()); out.accept(ModItems.SHOTGUN_SHELL.get());
+                        out.accept(ModItems.SNIPER_AMMO.get()); out.accept(ModItems.ROCKET_AMMO.get());
+                    }).build());
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/registry/ModEntities.java"
+package com.arsenalmod.registry;
+
+import com.arsenalmod.ArsenalMod;
+import com.arsenalmod.entity.*;
+import net.minecraft.world.entity.*;
+import net.minecraftforge.registries.*;
+
+public class ModEntities {
+    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, ArsenalMod.MODID);
+    public static final RegistryObject<EntityType<BulletEntity>> BULLET = ENTITIES.register("bullet",
+            () -> EntityType.Builder.<BulletEntity>of(BulletEntity::new, MobCategory.MISC).sized(0.14F, 0.14F).clientTrackingRange(8).updateInterval(1).build("bullet"));
+    public static final RegistryObject<EntityType<RocketEntity>> ROCKET = ENTITIES.register("rocket",
+            () -> EntityType.Builder.<RocketEntity>of(RocketEntity::new, MobCategory.MISC).sized(0.42F, 0.42F).clientTrackingRange(10).updateInterval(1).build("rocket"));
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/java/com/arsenalmod/registry/ModItems.java"
+package com.arsenalmod.registry;
+
+import com.arsenalmod.ArsenalMod;
+import com.arsenalmod.item.*;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.*;
+
+public class ModItems {
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, ArsenalMod.MODID);
+    public static final RegistryObject<Item> GLOCK19 = ITEMS.register("glock19", () -> new GunItem(GunType.GLOCK19));
+    public static final RegistryObject<Item> AK47 = ITEMS.register("ak47", () -> new GunItem(GunType.AK47));
+    public static final RegistryObject<Item> M4A1 = ITEMS.register("m4a1", () -> new GunItem(GunType.M4A1));
+    public static final RegistryObject<Item> SPAS12 = ITEMS.register("spas12", () -> new GunItem(GunType.SPAS12));
+    public static final RegistryObject<Item> AWP_SNIPER = ITEMS.register("awp_sniper", () -> new GunItem(GunType.AWP_SNIPER));
+    public static final RegistryObject<Item> MINIGUN = ITEMS.register("minigun", () -> new GunItem(GunType.MINIGUN));
+    public static final RegistryObject<Item> RPG7 = ITEMS.register("rpg7", () -> new GunItem(GunType.RPG7));
+    public static final RegistryObject<Item> PISTOL_AMMO = ITEMS.register("pistol_ammo", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> RIFLE_AMMO = ITEMS.register("rifle_ammo", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> SHOTGUN_SHELL = ITEMS.register("shotgun_shell", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> SNIPER_AMMO = ITEMS.register("sniper_ammo", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> ROCKET_AMMO = ITEMS.register("rocket_ammo", () -> new Item(new Item.Properties().stacksTo(16)));
+
+    public static Item getAmmoItem(GunType.AmmoKind k) {
+        return switch (k) {
+            case PISTOL -> PISTOL_AMMO.get();
+            case RIFLE -> RIFLE_AMMO.get();
+            case SHOTGUN -> SHOTGUN_SHELL.get();
+            case SNIPER -> SNIPER_AMMO.get();
+            case ROCKET -> ROCKET_AMMO.get();
+        };
+    }
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/META-INF/mods.toml"
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+[[mods]]
+modId="arsenalmod"
+version="2.0.0"
+displayName="Arsenal 3D Realista"
+description='''Armas 3D detalhadas, maos animadas, marcas de bala nos blocos, estojos voando e balistica realista.'''
+[[dependencies.arsenalmod]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.arsenalmod]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="BOTH"
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/lang/en_us.json"
+{
+  "itemGroup.arsenalmod.arsenal_tab": "Arsenal 3D - Armas",
+  "item.arsenalmod.glock19": "Glock 19 (9mm)",
+  "item.arsenalmod.ak47": "AK-47 (7.62mm)",
+  "item.arsenalmod.m4a1": "M4A1 Tatica (5.56mm)",
+  "item.arsenalmod.spas12": "SPAS-12 (Cal. 12)",
+  "item.arsenalmod.awp_sniper": "AWP Sniper (.338)",
+  "item.arsenalmod.minigun": "M134 Minigun",
+  "item.arsenalmod.rpg7": "RPG-7 (HEAT)",
+  "item.arsenalmod.pistol_ammo": "Municao 9mm",
+  "item.arsenalmod.rifle_ammo": "Municao de Fuzil",
+  "item.arsenalmod.shotgun_shell": "Cartucho Calibre 12",
+  "item.arsenalmod.sniper_ammo": "Municao .338 Lapua",
+  "item.arsenalmod.rocket_ammo": "Foguete PG-7V",
+  "key.categories.arsenalmod": "Arsenal 3D",
+  "key.arsenalmod.reload": "Recarregar Arma"
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/lang/pt_br.json"
+{
+  "itemGroup.arsenalmod.arsenal_tab": "Arsenal 3D - Armas",
+  "item.arsenalmod.glock19": "Glock 19 (9mm)",
+  "item.arsenalmod.ak47": "AK-47 (7.62mm)",
+  "item.arsenalmod.m4a1": "M4A1 Tatica (5.56mm)",
+  "item.arsenalmod.spas12": "SPAS-12 (Cal. 12)",
+  "item.arsenalmod.awp_sniper": "AWP Sniper (.338)",
+  "item.arsenalmod.minigun": "M134 Minigun",
+  "item.arsenalmod.rpg7": "RPG-7 (HEAT)",
+  "item.arsenalmod.pistol_ammo": "Municao 9mm",
+  "item.arsenalmod.rifle_ammo": "Municao de Fuzil",
+  "item.arsenalmod.shotgun_shell": "Cartucho Calibre 12",
+  "item.arsenalmod.sniper_ammo": "Municao .338 Lapua",
+  "item.arsenalmod.rocket_ammo": "Foguete PG-7V",
+  "key.categories.arsenalmod": "Arsenal 3D",
+  "key.arsenalmod.reload": "Recarregar Arma"
+}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/ak47.json"
+{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/awp_sniper.json"
+{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/glock19.json"
+{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/m4a1.json"
+{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/minigun.json"
+{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/pistol_ammo.json"
+{"parent":"minecraft:item/generated","textures":{"layer0":"arsenalmod:item/pistol_ammo"}}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/rifle_ammo.json"
+{"parent":"minecraft:item/generated","textures":{"layer0":"arsenalmod:item/rifle_ammo"}}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/rocket_ammo.json"
+{"parent":"minecraft:item/generated","textures":{"layer0":"arsenalmod:item/rocket_ammo"}}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/rpg7.json"
+{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/shotgun_shell.json"
+{"parent":"minecraft:item/generated","textures":{"layer0":"arsenalmod:item/shotgun_shell"}}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/sniper_ammo.json"
+{"parent":"minecraft:item/generated","textures":{"layer0":"arsenalmod:item/sniper_ammo"}}
+ARSENAL_V2_EOF
+
+cat << 'ARSENAL_V2_EOF' > "src/main/resources/assets/arsenalmod/models/item/spas12.json"
+{"parent":"builtin/entity","gui_light":"front","display":{"firstperson_righthand":{"scale":[1,1,1]},"firstperson_lefthand":{"scale":[1,1,1]},"thirdperson_righthand":{"scale":[1,1,1]},"thirdperson_lefthand":{"scale":[1,1,1]},"gui":{"scale":[1,1,1]},"ground":{"scale":[1,1,1]},"fixed":{"scale":[1,1,1]}}}
 ARSENAL_V2_EOF
 
 
@@ -2443,7 +2407,7 @@ java -Djava.awt.headless=true GenTexturesV2
 rm -f GenTexturesV2.java GenTexturesV2.class
 
 echo "[5/5] Compilando Arsenal 3D v2.0 para .jar (Forge 1.20.1)..."
-"$GBIN" build --no-daemon
+"$GBIN" build --no-daemon --stacktrace
 
 JAR_FILE="$(ls build/libs/arsenalmod-*.jar | grep -v sources | head -n 1)"
 cp "$JAR_FILE" "$BASE_DIR/arsenalmod-2.0.0-forge-1.20.1.jar"
