@@ -1,0 +1,29 @@
+name: Compilar Arsenal 3D (Forge 1.20.1)
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Compilar .jar
+        run: |
+          chmod +x compilar_arsenal.sh
+          ./compilar_arsenal.sh
+
+      - name: Salvar .jar compilado
+        uses: actions/upload-artifact@v4
+        with:
+          name: arsenalmod-1.20.1-forge
+          path: arsenalmod-1.0.0.jar
