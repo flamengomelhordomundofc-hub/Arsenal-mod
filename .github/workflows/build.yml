@@ -14,9 +14,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Compilar Mod v2.0 (.jar)
-        run: bash compilar_arsenal_v2.sh
+        run: |
+          sed -i 's/\r$//' compilar_arsenal.sh
+          bash compilar_arsenal.sh
       - name: Baixar .jar v2.0 pronto
         uses: actions/upload-artifact@v4
         with:
           name: arsenalmod-v2.0-1.20.1-forge
-          path: arsenalmod-2.0.0-forge-1.20.1.jar
+          path: arsenalmod-*.jar
